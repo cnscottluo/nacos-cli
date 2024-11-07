@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"github.com/cnscottluo/nacos-cli/internal"
-	"github.com/cnscottluo/nacos-cli/internal/http"
 	"github.com/cnscottluo/nacos-cli/internal/nacos"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -10,6 +9,7 @@ import (
 )
 
 var cfgFile string
+var nacosClient *nacos.Client
 var Config nacos.Config
 
 var rootCmd = &cobra.Command{
@@ -17,7 +17,6 @@ var rootCmd = &cobra.Command{
 	Short: "A CLI tool for Nacos",
 	Long:  "A CLI tool for Nacos",
 	Run: func(cmd *cobra.Command, args []string) {
-		http.Login()
 		_ = cmd.Help()
 	},
 }
@@ -52,5 +51,5 @@ func initConfig() {
 
 	err := viper.Unmarshal(&Config)
 	internal.CheckErr(err)
-
+	nacosClient = nacos.NewClient(Config)
 }

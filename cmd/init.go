@@ -28,9 +28,17 @@ var initCmd = &cobra.Command{
 		}
 		return nil
 	},
+	PreRun: func(cmd *cobra.Command, args []string) {
+
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		setArgs(args)
 		detectConfigFile()
+		if auth {
+			loginResponse, err := nacosClient.Login(viper.GetString("nacos.addr"), viper.GetString("nacos.username"), viper.GetString("nacos.password"))
+			internal.CheckErr(err)
+			viper.Set("nacos.token", loginResponse.AccessToken)
+		}
 		err := viper.WriteConfig()
 		internal.CheckErr(err)
 	},

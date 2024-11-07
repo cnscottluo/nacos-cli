@@ -1,44 +1,48 @@
 package http
 
 import (
+	"github.com/cnscottluo/nacos-cli/internal/nacos"
 	"github.com/go-resty/resty/v2"
-	"github.com/golang-jwt/jwt/v5"
 )
 
-var HttpClient = resty.New()
-
-func Get(url string) {
-
+type Client struct {
+	config     *nacos.Config
+	webClient  *resty.Client
+	Middleware bool
 }
 
-type LoginResult struct {
-	AccessToken string `json:"accessToken"`
-	TokenTtl    uint64 `json:"tokenTtl"`
-	GlobalAdmin bool   `json:"globalAdmin"`
-	Username    string `json:"username"`
+func NewClient(config *nacos.Config) *Client {
+	client := Client{config: config, webClient: resty.New().SetDebug(true)}
+	return &client
 }
 
-func Login() {
-	var loginResult LoginResult
-	_, err := HttpClient.R().
-		SetDebug(true).
-		EnableGenerateCurlOnDebug().
-		SetResult(&loginResult).
-		SetFormData(map[string]string{
-			"username": "nacos",
-			"password": "nacos",
-		}).
-		Post("http://127.0.0.1:8848/nacos/v1/auth/login")
-	if err == nil {
-		println(loginResult.AccessToken)
-
-		jwt.Parse(loginResult.AccessToken, func(token *jwt.Token) (interface{}, error) {
-			if claims, ok := token.Claims.(jwt.MapClaims); ok {
-				println(claims["exp"].(float64))
-			}
-			return nil, nil
-		})
-	} else {
-		println(err)
+func (client *Client) Get[T any](url string, params map[string]string) (*T, error) {
+	if client.Middleware {
+		applyMiddleware(client)
 	}
+	var result T
+	req := client.webClient.R().
+		SetResult(&result)
+
+	if params != nil {
+		req.SetQueryParams(params)
+	}
+
+	_, err := req.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func applyMiddleware(client *Client) {
+	client.webClient.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		if client.config.Nacos.Auth {
+			req.SetQueryParam("accessToken", client.config.Nacos.Token)
+		}
+		return nil
+	})
+	client.webClient.OnAfterResponse(func(c *resty.Client, res *resty.Response) error {
+		return nil
+	})
 }
