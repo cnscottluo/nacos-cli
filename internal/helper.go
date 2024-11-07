@@ -2,7 +2,7 @@ package internal
 
 import (
 	"fmt"
-	"github.com/gosuri/uitable"
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"os"
 	"reflect"
@@ -14,6 +14,10 @@ func Log(format string, args ...interface{}) {
 	if Verbose {
 		_, _ = fmt.Fprintf(os.Stdout, format+"\n", args...)
 	}
+}
+
+func Info(format string, args ...interface{}) {
+	_, _ = fmt.Fprintf(os.Stdout, format+"\n", args...)
 }
 
 func Error(format string, args ...interface{}) {
@@ -44,21 +48,17 @@ func Struct2StringMap(s interface{}) map[string]string {
 	return result
 }
 
-func TableShow(data []interface{}, title ...string) {
-	table := uitable.New()
-	table.MaxColWidth = 50
-	table.AddRow(title)
-	for _, item := range data {
-		v := reflect.ValueOf(item)
-		if v.Kind() == reflect.Ptr && v.Elem().Kind() == reflect.Struct {
-			v = v.Elem()
+func TableShow(header []string, data [][]string) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader(header)
+	table.AppendBulk(data)
+	table.Render()
+}
 
-			var rowData []interface{}
-			for i := 0; i < v.NumField(); i++ {
-				value := v.Field(i) // 获取字段的值
-				rowData = append(rowData, value)
-			}
-			table.AddRow(rowData)
-		}
+func GenData[T any](data *[]T, trans func(T) []string) [][]string {
+	var result [][]string
+	for _, item := range *data {
+		result = append(result, trans(item))
 	}
+	return result
 }

@@ -25,7 +25,7 @@ const getNamespaceUrl = "/v2/console/namespace"
 const createNamespaceUrl = "/v2/console/namespace"
 
 // 编辑命名空间 PUT
-const editNamespaceUrl = "/v2/console/namespace"
+const updateNamespaceUrl = "/v2/console/namespace"
 
 // 删除命名空间 DELETE
 const deleteNamespaceUrl = "/v2/console/namespace"

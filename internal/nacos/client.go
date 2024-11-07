@@ -1,63 +1,68 @@
 package nacos
 
 import (
-	"github.com/cnscottluo/nacos-cli/internal"
 	"github.com/cnscottluo/nacos-cli/internal/http"
+	"github.com/cnscottluo/nacos-cli/internal/types"
 )
 
 // Client Nacos client
 type Client struct {
-	config *Config
-	http   *http.Client
+	config     *types.Config
+	httpClient *http.Client
 }
 
-func NewClient(config *Config) *Client {
-	client := Client{config: config, http: http.NewClient(config, true)}
-	return &client
+func NewClient(config *types.Config) *Client {
+	client := &Client{
+		config:     config,
+		httpClient: http.NewClient(config),
+	}
+	return client
 }
 
-func (client *Client) GetNamespaces() ([]NamespaceResp, error) {
-	http.ApplyMiddleware = true
-	defer func() {
-		http.ApplyMiddleware = false
-	}()
-	var result R[[]NamespaceResp]
-	_, err := http.Client.R().
-		SetResult(&result).
-		Get(client.config.Nacos.Addr + getNamespaceListUrl)
+func (client *Client) GetNamespaces() (*[]NamespaceResp, error) {
+	r, err := http.Get[R[[]NamespaceResp]](client.httpClient, client.config.Nacos.Addr+getNamespaceListUrl, nil)
 	if err != nil {
 		return nil, err
 	}
-	return result.Data, nil
+	return r.Data, nil
 }
 
-func (client *Client) GetNamespace(namespaceId string) (R[NamespaceResp], error) {
-	http.ApplyMiddleware = true
-	defer func() {
-		http.ApplyMiddleware = false
-	}()
-	resp, _ := http.Client.R().
-		SetResult(&R[NamespaceResp]{}).
-		SetQueryParam("namespaceId", namespaceId).
-		Get(client.config.Nacos.Addr + getNamespaceUrl)
-	return *resp.Result().(*R[NamespaceResp]), nil
-}
-
-func (client *Client) Login(addr string, username string, password string) (*LoginResponse, error) {
-	resp, err := http.Client.R().
-		SetResult(&LoginResponse{}).
-		SetFormData(internal.Struct2StringMap(LoginRequest{
-			Username: username,
-			Password: password,
-		})).
-		Post(addr + loginUrl)
+func (client *Client) GetNamespace(namespaceId string) (*NamespaceResp, error) {
+	r, err := http.Get[R[NamespaceResp]](client.httpClient, client.config.Nacos.Addr+getNamespaceUrl, map[string]string{"namespaceId": namespaceId})
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode() == 200 {
-		return resp.Result().(*LoginResponse), nil
-	} else {
-		internal.Log("Login failed: %s", string(resp.Body()))
-		return nil, nil
+	return r.Data, nil
+}
+
+func (client *Client) Login(addr string, username string, password string) (*LoginResp, error) {
+	r, err := http.Post[LoginResp](client.httpClient, addr+loginUrl, map[string]string{"username": username, "password": password})
+	if err != nil {
+		return nil, err
 	}
+	return r, nil
+}
+
+func (client *Client) CreateNamespace(namespaceId string, namespaceName string, namespaceDesc string) (bool, error) {
+	r, err := http.Post[R[bool]](client.httpClient, client.config.Nacos.Addr+createNamespaceUrl, map[string]string{"namespaceId": namespaceId, "namespaceName": namespaceName, "namespaceDesc": namespaceDesc})
+	if err != nil {
+		return false, err
+	}
+	return *r.Data, nil
+}
+
+func (client *Client) UpdateNamespace(namespaceId string, namespaceName string, namespaceDesc string) (bool, error) {
+	r, err := http.Put[R[bool]](client.httpClient, client.config.Nacos.Addr+updateNamespaceUrl, map[string]string{"namespaceId": namespaceId, "namespaceName": namespaceName, "namespaceDesc": namespaceDesc})
+	if err != nil {
+		return false, err
+	}
+	return *r.Data, nil
+}
+
+func (client *Client) DeleteNamespace(namespaceId string) (bool, error) {
+	r, err := http.Delete[R[bool]](client.httpClient, client.config.Nacos.Addr+deleteNamespaceUrl, map[string]string{"namespaceId": namespaceId})
+	if err != nil {
+		return false, err
+	}
+	return *r.Data, nil
 }

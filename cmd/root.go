@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/cnscottluo/nacos-cli/internal"
 	"github.com/cnscottluo/nacos-cli/internal/nacos"
+	"github.com/cnscottluo/nacos-cli/internal/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -10,7 +11,7 @@ import (
 
 var cfgFile string
 var nacosClient *nacos.Client
-var Config nacos.Config
+var Config = new(types.Config)
 
 var rootCmd = &cobra.Command{
 	Use:   "nacos-cli",
@@ -49,7 +50,7 @@ func initConfig() {
 		internal.Log("Using config file: %s", viper.ConfigFileUsed())
 	}
 
-	err := viper.Unmarshal(&Config)
+	err := viper.Unmarshal(Config)
 	internal.CheckErr(err)
 	nacosClient = nacos.NewClient(Config)
 }

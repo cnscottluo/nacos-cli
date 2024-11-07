@@ -3,6 +3,8 @@ package cmd
 import (
 	"fmt"
 	"github.com/cnscottluo/nacos-cli/internal"
+	"github.com/cnscottluo/nacos-cli/internal/nacos"
+	"strconv"
 
 	"github.com/spf13/cobra"
 )
@@ -14,7 +16,7 @@ var nsCmd = &cobra.Command{
 	Short: "namespace management",
 	Long:  "namespace management",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("ns called")
+		_ = cmd.Help()
 	},
 }
 
@@ -35,16 +37,110 @@ var getCmd = &cobra.Command{
 			internal.Log("get all namespaces")
 			result, err := nacosClient.GetNamespaces()
 			internal.CheckErr(err)
-			internal.TableShow([]interface{}{result}, "Namespace", "Name", "Desc", "Quota", "Count", "Type")
+			internal.TableShow([]string{"Namespace", "Name", "Desc", "Quota", "Count", "Type"}, internal.GenData(result, func(resp nacos.NamespaceResp) []string {
+				return []string{
+					resp.Namespace,
+					resp.NamespaceShowName,
+					resp.NamespaceDesc,
+					strconv.Itoa(resp.Quota),
+					strconv.Itoa(resp.ConfigCount),
+					func() string {
+						switch resp.Type {
+						case 0:
+							return "Global"
+						case 1:
+							return "Private"
+						case 2:
+							return "Custom"
+						default:
+							return "Unknown"
+						}
+					}(),
+				}
+			}))
 		} else {
 			internal.Log("get namespace %s", args[0])
+			result, err := nacosClient.GetNamespace(args[0])
+			internal.CheckErr(err)
+			internal.TableShow([]string{"Namespace", "Name", "Desc", "Quota", "Count", "Type"}, internal.GenData(&[]nacos.NamespaceResp{*result}, func(resp nacos.NamespaceResp) []string {
+				return []string{
+					resp.Namespace,
+					resp.NamespaceShowName,
+					resp.NamespaceDesc,
+					strconv.Itoa(resp.Quota),
+					strconv.Itoa(resp.ConfigCount),
+					func() string {
+						switch resp.Type {
+						case 0:
+							return "Global"
+						case 1:
+							return "Private"
+						case 2:
+							return "Custom"
+						default:
+							return "Unknown"
+						}
+					}(),
+				}
+			}))
 		}
+	},
+}
+
+var createCmd = &cobra.Command{
+	Use:   "create <namespaceId> <namespaceName> [namespaceDesc]",
+	Short: "create namespace",
+	Args:  cobra.RangeArgs(2, 3),
+	Run: func(cmd *cobra.Command, args []string) {
+		namespaceId := args[0]
+		namespaceName := args[1]
+		namespaceDesc := ""
+		if len(args) == 3 {
+			namespaceDesc = args[2]
+		}
+		internal.Log("create namespace %s %s %s", namespaceId, namespaceName, namespaceDesc)
+		_, err := nacosClient.CreateNamespace(namespaceId, namespaceName, namespaceDesc)
+		internal.CheckErr(err)
+		internal.Info("create namespace %s success", namespaceId)
+	},
+}
+
+var updateCmd = &cobra.Command{
+	Use:   "update <namespaceId> <namespaceName> [namespaceDesc]",
+	Short: "update namespace",
+	Args:  cobra.RangeArgs(2, 3),
+	Run: func(cmd *cobra.Command, args []string) {
+		namespaceId := args[0]
+		namespaceName := args[1]
+		namespaceDesc := ""
+		if len(args) == 3 {
+			namespaceDesc = args[2]
+		}
+		internal.Log("update namespace %s %s %s", namespaceId, namespaceName, namespaceDesc)
+		_, err := nacosClient.UpdateNamespace(namespaceId, namespaceName, namespaceDesc)
+		internal.CheckErr(err)
+		internal.Info("update namespace %s success", namespaceId)
+	},
+}
+
+var deleteCmd = &cobra.Command{
+	Use:   "delete <namespaceId>",
+	Short: "delete namespace",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		internal.Log("delete namespace %s", args[0])
+		_, err := nacosClient.DeleteNamespace(args[0])
+		internal.CheckErr(err)
+		internal.Info("delete namespace %s success", args[0])
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(nsCmd)
 	nsCmd.AddCommand(getCmd)
+	nsCmd.AddCommand(createCmd)
+	nsCmd.AddCommand(updateCmd)
+	nsCmd.AddCommand(deleteCmd)
 
-	nsCmd.Flags().BoolVarP(&all, "all", "a", false, "get all namespaces")
+	getCmd.Flags().BoolVarP(&all, "all", "a", false, "get all namespaces")
 }
