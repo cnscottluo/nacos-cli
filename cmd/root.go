@@ -7,13 +7,12 @@ import (
 	"github.com/cnscottluo/nacos-cli/internal/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"log"
 	"os"
 )
 
 var cfgFile string
 var nacosClient *nacos.Client
-var Config = new(types.Config)
+var config = new(types.Config)
 
 var rootCmd = &cobra.Command{
 	Use:   "nacos-cli",
@@ -24,21 +23,9 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-func handleError(err error) {
-	if err != nil {
-		// 记录错误到日志文件
-		log.Printf("Error: %v\n", err)
-		// 打印到标准错误流
-		fmt.Println("Custom Error:", err)
-		// 终止程序
-		os.Exit(1)
-	}
-}
-
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
-		//handleError(err)
 		os.Exit(1)
 	}
 }
@@ -47,6 +34,19 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.nacos.toml)")
 	rootCmd.PersistentFlags().BoolVar(&internal.Verbose, "verbose", false, "verbose output")
+
+	rootCmd.PersistentFlags().String("addr", "http://127.0.0.1:8848/nacos", "nacos server address")
+	rootCmd.PersistentFlags().StringP("username", "u", "nacos", "nacos server username")
+	rootCmd.PersistentFlags().StringP("password", "p", "nacos", "nacos server password")
+	rootCmd.PersistentFlags().StringP("namespace", "n", "public", "nacos server namespace")
+	rootCmd.PersistentFlags().StringP("group", "g", "DEFAULT_GROUP", "nacos server group")
+
+	_ = viper.BindPFlag("nacos.addr", rootCmd.PersistentFlags().Lookup("addr"))
+	_ = viper.BindPFlag("nacos.username", rootCmd.PersistentFlags().Lookup("username"))
+	_ = viper.BindPFlag("nacos.password", rootCmd.PersistentFlags().Lookup("password"))
+	_ = viper.BindPFlag("nacos.namespace", rootCmd.PersistentFlags().Lookup("namespace"))
+	_ = viper.BindPFlag("nacos.group", rootCmd.PersistentFlags().Lookup("group"))
+
 }
 
 func initConfig() {
@@ -64,7 +64,11 @@ func initConfig() {
 		internal.Log("Using config file: %s", viper.ConfigFileUsed())
 	}
 
-	err := viper.Unmarshal(Config)
+	err := viper.Unmarshal(config)
 	internal.CheckErr(err)
-	nacosClient = nacos.NewClient(Config)
+	nacosClient = nacos.NewClient(config)
+
+	for key, value := range viper.AllSettings() {
+		fmt.Printf("%s: %v\n", key, value)
+	}
 }

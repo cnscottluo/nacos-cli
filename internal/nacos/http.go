@@ -19,21 +19,21 @@ type HttpClient struct {
 }
 
 func NewHttpClient(config *types.Config, owner *Client) *HttpClient {
-	var webClient = resty.New().SetDebug(true)
+	var webClient = resty.New()
 	client := &HttpClient{
 		config:    config,
 		webClient: webClient,
 		owner:     owner,
 	}
 	webClient.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		if config.Nacos.Auth && !IsLogin(req.URL) {
+		if len(config.Nacos.Username) != 0 && len(config.Nacos.Password) != 0 && !IsLogin(req.URL) {
 			req.SetQueryParam("accessToken", config.Nacos.Token)
 		}
-		internal.Log("BeforeRequest: %s", req.URL)
+		internal.LogReq(req)
 		return nil
 	})
 	webClient.OnAfterResponse(func(c *resty.Client, res *resty.Response) error {
-		internal.Log("AfterResponse %s", string(res.Body()))
+		internal.LogRes(res)
 		url := res.Request.URL
 
 		// login url intercept

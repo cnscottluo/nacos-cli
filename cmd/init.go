@@ -14,8 +14,8 @@ var auth bool
 
 var initCmd = &cobra.Command{
 	Use:   "init <addr> [username] [password] [namespace] [group]",
-	Short: "init nacos config",
-	Long:  `init nacos config.`,
+	Short: "init nacos",
+	Long:  `init nacos.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return fmt.Errorf("addr is required")
@@ -27,9 +27,6 @@ var initCmd = &cobra.Command{
 			return fmt.Errorf("username and password is required when auth is true")
 		}
 		return nil
-	},
-	PreRun: func(cmd *cobra.Command, args []string) {
-
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		setArgs(args)

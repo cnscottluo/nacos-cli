@@ -6,7 +6,6 @@ type NacosConfig struct {
 	Password  string `json:"password" yaml:"password"`
 	Namespace string `json:"namespace" yaml:"namespace"`
 	Group     string `json:"group" yaml:"group"`
-	Auth      bool   `json:"auth" yaml:"auth"`
 	Token     string `json:"token" yaml:"token"`
 }
 

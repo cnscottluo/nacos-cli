@@ -1,28 +1,53 @@
 package internal
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
+	"github.com/go-resty/resty/v2"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"io"
 	"os"
-	"reflect"
 	"strings"
 )
 
+const totalLength = 80
+
 var Verbose bool
 
-func Log(format string, args ...interface{}) {
+func Log(format string, args ...any) {
 	if Verbose {
-		_, _ = fmt.Fprintf(os.Stdout, format+"\n", args...)
+		fmt.Println(format, args)
 	}
 }
 
-func Info(format string, args ...interface{}) {
+func LogReq(req *resty.Request) {
+	if Verbose {
+		fmt.Println(strings.Repeat(">", totalLength))
+		fmt.Println("URL: ", req.URL)
+		fmt.Println("Method: ", req.Method)
+		fmt.Println("Query Params: ", req.QueryParam)
+		fmt.Println("FormData: ", req.FormData)
+		fmt.Println("Body: ", req.Body)
+		fmt.Println()
+	}
+}
+
+func LogRes(res *resty.Response) {
+	if Verbose {
+		fmt.Println(strings.Repeat("<", totalLength))
+		fmt.Println("URL: ", res.Request.URL)
+		fmt.Println("Res: ", string(res.Body()))
+		fmt.Println()
+	}
+}
+
+func Info(format string, args ...any) {
 	_, _ = fmt.Fprintf(os.Stdout, format+"\n", args...)
 }
 
-func Error(format string, args ...interface{}) {
+func Error(format string, args ...any) {
 	_, _ = fmt.Fprintf(os.Stderr, format+"\n", args...)
 	os.Exit(1)
 }
@@ -31,30 +56,11 @@ func CheckErr(err error) {
 	cobra.CheckErr(err)
 }
 
-func Struct2StringMap(s interface{}) map[string]string {
-	result := make(map[string]string)
-	v := reflect.ValueOf(s)
-
-	// 检查是否为结构体类型
-	if v.Kind() == reflect.Struct {
-		for i := 0; i < v.NumField(); i++ {
-			field := v.Type().Field(i)
-			value := v.Field(i)
-			tagName := field.Tag.Get("json")
-			if tagName == "" {
-				tagName = field.Name // 如果没有标签，则使用字段名称
-			}
-			result[tagName] = fmt.Sprintf("%v", value.Interface())
-		}
-	}
-	return result
-}
-
-func ConfigShow(dataId string, content *string) {
+func ShowConfig(dataId string, content string) {
 	const totalLength = 80
 	paddingLength := (totalLength - len(dataId)) / 2
 	fmt.Println(strings.Repeat("=", paddingLength) + dataId + strings.Repeat("=", totalLength-len(dataId)-paddingLength))
-	fmt.Println(*content)
+	fmt.Println(content)
 	fmt.Println(strings.Repeat("=", totalLength))
 }
 
@@ -73,8 +79,8 @@ func GenData[T any](data *[]T, trans func(T) []string) [][]string {
 	return result
 }
 
-func SaveConfig(dataId string, result *string) {
-	_ = os.WriteFile(dataId, []byte(*result), 0644)
+func SaveConfig(dataId string, result string) {
+	_ = os.WriteFile(dataId, []byte(result), 0644)
 }
 
 func Bool2String(success bool) string {
@@ -98,4 +104,16 @@ func ReadFile(path string) (string, error) {
 		return "", err
 	}
 	return string(content), nil
+}
+
+func Md5String(str string) string {
+	h := md5.New()
+	h.Write([]byte(str))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+func Md5Bytes(bytes []byte) string {
+	h := md5.New()
+	h.Write(bytes)
+	return hex.EncodeToString(h.Sum(nil))
 }
