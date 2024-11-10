@@ -1,7 +1,11 @@
 package nacos
 
+import "strings"
+
 // 登录 POST
 const loginUrl = "/v1/auth/login"
+
+const getConfigListUrl = "/v2/cs/history/configs"
 
 // 获取配置 GET
 const getConfigUrl = "/v2/cs/config"
@@ -29,3 +33,7 @@ const updateNamespaceUrl = "/v2/console/namespace"
 
 // 删除命名空间 DELETE
 const deleteNamespaceUrl = "/v2/console/namespace"
+
+func IsLogin(url string) bool {
+	return strings.Contains(url, loginUrl)
+}

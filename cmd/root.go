@@ -1,11 +1,13 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/cnscottluo/nacos-cli/internal"
 	"github.com/cnscottluo/nacos-cli/internal/nacos"
 	"github.com/cnscottluo/nacos-cli/internal/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"log"
 	"os"
 )
 
@@ -22,16 +24,28 @@ var rootCmd = &cobra.Command{
 	},
 }
 
+func handleError(err error) {
+	if err != nil {
+		// 记录错误到日志文件
+		log.Printf("Error: %v\n", err)
+		// 打印到标准错误流
+		fmt.Println("Custom Error:", err)
+		// 终止程序
+		os.Exit(1)
+	}
+}
+
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
+		//handleError(err)
 		os.Exit(1)
 	}
 }
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "f", "", "config file (default is $HOME/.nacos.toml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.nacos.toml)")
 	rootCmd.PersistentFlags().BoolVar(&internal.Verbose, "verbose", false, "verbose output")
 }
 

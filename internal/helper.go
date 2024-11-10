@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"io"
 	"os"
 	"reflect"
+	"strings"
 )
 
 var Verbose bool
@@ -48,6 +50,14 @@ func Struct2StringMap(s interface{}) map[string]string {
 	return result
 }
 
+func ConfigShow(dataId string, content *string) {
+	const totalLength = 80
+	paddingLength := (totalLength - len(dataId)) / 2
+	fmt.Println(strings.Repeat("=", paddingLength) + dataId + strings.Repeat("=", totalLength-len(dataId)-paddingLength))
+	fmt.Println(*content)
+	fmt.Println(strings.Repeat("=", totalLength))
+}
+
 func TableShow(header []string, data [][]string) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(header)
@@ -61,4 +71,31 @@ func GenData[T any](data *[]T, trans func(T) []string) [][]string {
 		result = append(result, trans(item))
 	}
 	return result
+}
+
+func SaveConfig(dataId string, result *string) {
+	_ = os.WriteFile(dataId, []byte(*result), 0644)
+}
+
+func Bool2String(success bool) string {
+	if success {
+		return "success"
+	} else {
+		return "fail"
+	}
+}
+
+func ReadFile(path string) (string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(file)
+	content, err := io.ReadAll(file)
+	if err != nil {
+		return "", err
+	}
+	return string(content), nil
 }

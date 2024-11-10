@@ -65,7 +65,7 @@ func setArgs(args []string) {
 	if len(args) > 3 {
 		viper.Set("nacos.namespace", args[3])
 	} else {
-		viper.Set("nacos.namespace", "public")
+		viper.Set("nacos.namespace", "")
 	}
 	if len(args) > 4 {
 		viper.Set("nacos.group", args[4])

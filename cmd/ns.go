@@ -20,7 +20,7 @@ var nsCmd = &cobra.Command{
 	},
 }
 
-var getCmd = &cobra.Command{
+var nsGetCmd = &cobra.Command{
 	Use:   "get [namespaceId]",
 	Short: "get namespace",
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -87,7 +87,7 @@ var getCmd = &cobra.Command{
 	},
 }
 
-var createCmd = &cobra.Command{
+var nsCreateCmd = &cobra.Command{
 	Use:   "create <namespaceId> <namespaceName> [namespaceDesc]",
 	Short: "create namespace",
 	Args:  cobra.RangeArgs(2, 3),
@@ -123,7 +123,7 @@ var updateCmd = &cobra.Command{
 	},
 }
 
-var deleteCmd = &cobra.Command{
+var nsDeleteCmd = &cobra.Command{
 	Use:   "delete <namespaceId>",
 	Short: "delete namespace",
 	Args:  cobra.ExactArgs(1),
@@ -137,10 +137,10 @@ var deleteCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(nsCmd)
-	nsCmd.AddCommand(getCmd)
-	nsCmd.AddCommand(createCmd)
+	nsCmd.AddCommand(nsGetCmd)
+	nsCmd.AddCommand(nsCreateCmd)
 	nsCmd.AddCommand(updateCmd)
-	nsCmd.AddCommand(deleteCmd)
+	nsCmd.AddCommand(nsDeleteCmd)
 
-	getCmd.Flags().BoolVarP(&all, "all", "a", false, "get all namespaces")
+	nsGetCmd.Flags().BoolVarP(&all, "all", "a", false, "get all namespaces")
 }
