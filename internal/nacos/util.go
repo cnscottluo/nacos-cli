@@ -1,13 +1,13 @@
 package nacos
 
 import (
-	"path"
+	"path/filepath"
 	"strings"
 )
 
 // DetermineConfigType determines the type of the configuration file based on the file extension.
 func DetermineConfigType(filePath string) string {
-	ext := strings.TrimPrefix(strings.ToLower(path.Ext(filePath)), ".")
+	ext := strings.TrimPrefix(strings.ToLower(filepath.Ext(filePath)), ".")
 	switch ext {
 	case "properties":
 		return "properties"
@@ -25,13 +25,13 @@ func DetermineConfigType(filePath string) string {
 }
 
 // DetermineDataId determines the dataId of the configuration file based on the file name.
-func DetermineDataId(filePath string) string {
-	return path.Base(filePath)
+func DetermineDataId(file string) string {
+	return filepath.Base(file)
 }
 
 // IsValidConfigType checks if the configType is valid.
 func IsValidConfigType(configType string) bool {
-	switch configType {
+	switch strings.ToLower(configType) {
 	case "properties", "xml", "json", "html", "yaml", "text":
 		return true
 	default:
@@ -41,5 +41,5 @@ func IsValidConfigType(configType string) bool {
 
 // IsLogin checks if the url is a login url.
 func IsLogin(url string) bool {
-	return strings.Contains(url, loginUrl)
+	return strings.Contains(url, LoginUrl)
 }

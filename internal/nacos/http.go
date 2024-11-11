@@ -66,9 +66,15 @@ func NewHttpClient(config *types.Config, owner *Client) *HttpClient {
 				if err != nil {
 					return errors.New(string(res.Body()))
 				}
-				if fmt.Sprintf("%v", result["code"]) != "0" {
-					return errors.New(result["data"].(string))
+
+				if value, exists := result["code"]; exists {
+					if fmt.Sprintf("%v", value) != "0" {
+						return errors.New(result["data"].(string))
+					}
+				} else {
+					return errors.New(result["error"].(string))
 				}
+
 			}
 		}
 		return nil

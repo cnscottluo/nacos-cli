@@ -2,14 +2,15 @@ package editor
 
 import (
 	"fmt"
-	"github.com/cnscottluo/nacos-cli/internal"
-	"github.com/cnscottluo/nacos-cli/internal/term"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/cnscottluo/nacos-cli/internal"
+	"github.com/cnscottluo/nacos-cli/internal/term"
 )
 
 const (
@@ -25,7 +26,7 @@ type Editor struct {
 }
 
 func (e Editor) LaunchTempFile(prefix, suffix string, r io.Reader) ([]byte, string, error) {
-	file, err := os.CreateTemp("", prefix+suffix)
+	file, err := os.CreateTemp("", prefix+"*-"+suffix)
 	if err != nil {
 		return nil, "", err
 	}

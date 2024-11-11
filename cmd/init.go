@@ -1,11 +1,12 @@
 package cmd
 
 import (
-	"fmt"
-	"github.com/cnscottluo/nacos-cli/internal"
-	"github.com/spf13/viper"
+	"errors"
 	"os"
 	"path"
+
+	"github.com/cnscottluo/nacos-cli/internal"
+	"github.com/spf13/viper"
 
 	"github.com/spf13/cobra"
 )
@@ -13,18 +14,18 @@ import (
 var auth bool
 
 var initCmd = &cobra.Command{
-	Use:   "init <addr> [username] [password] [namespace] [group]",
+	Use:   "init <addr> [username] [password] [namespaceId] [groupName]",
 	Short: "init nacos",
 	Long:  `init nacos.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			return fmt.Errorf("addr is required")
+			return errors.New("addr arg is required")
 		}
 		if len(args) > 5 {
-			return fmt.Errorf("too many arguments")
+			return errors.New("too many arguments")
 		}
 		if auth && len(args) < 3 {
-			return fmt.Errorf("username and password is required when auth is true")
+			return errors.New("username and password args is required when auth is true")
 		}
 		return nil
 	},
@@ -32,9 +33,12 @@ var initCmd = &cobra.Command{
 		setArgs(args)
 		detectConfigFile()
 		if auth {
-			loginResponse, err := nacosClient.Login(viper.GetString("nacos.addr"), viper.GetString("nacos.username"), viper.GetString("nacos.password"))
+			loginResponse, err := nacosClient.Login(
+				viper.GetString("nacos.addr"), viper.GetString("nacos.username"), viper.GetString("nacos.password"),
+			)
 			internal.CheckErr(err)
 			viper.Set("nacos.token", loginResponse.AccessToken)
+			internal.Info("%s login success", viper.GetString("nacos.username"))
 		}
 		err := viper.WriteConfig()
 		internal.CheckErr(err)
@@ -60,14 +64,14 @@ func setArgs(args []string) {
 		viper.Set("nacos.password", args[2])
 	}
 	if len(args) > 3 {
-		viper.Set("nacos.namespace", args[3])
+		viper.Set("nacos.namespaceId", args[3])
 	} else {
-		viper.Set("nacos.namespace", "")
+		viper.Set("nacos.namespaceId", "public")
 	}
 	if len(args) > 4 {
-		viper.Set("nacos.group", args[4])
+		viper.Set("nacos.groupName", args[4])
 	} else {
-		viper.Set("nacos.group", "DEFAULT_GROUP")
+		viper.Set("nacos.groupName", "DEFAULT_GROUP")
 	}
 	viper.Set("nacos.auth", auth)
 }

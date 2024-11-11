@@ -3,14 +3,17 @@ package internal
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
+	"reflect"
 	"strings"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/gookit/color"
+	"github.com/kr/text"
 	"github.com/olekukonko/tablewriter"
-	"github.com/spf13/cobra"
 )
 
 // TotalLength is the total length of the log
@@ -22,7 +25,7 @@ var Verbose bool
 // VerboseLog print verbose log
 func VerboseLog(format string, args ...any) {
 	if Verbose {
-		fmt.Printf(format+"\n", args)
+		fmt.Printf(format+"\n", args...)
 	}
 }
 
@@ -51,29 +54,36 @@ func VerboseLogRes(res *resty.Response) {
 
 // Info print info
 func Info(format string, args ...any) {
-	fmt.Printf(format+"\n", args...)
+	fmt.Println(color.Green.Sprintf(format, args))
 }
 
 // Error print error
 func Error(format string, args ...any) {
-	fmt.Fprintf(os.Stderr, format+"\n", args...)
+	fmt.Println(color.Red.Sprintf("Error: "+format, args...))
 }
 
 // CheckErr check error
 func CheckErr(err error) {
-	cobra.CheckErr(err)
+	if err != nil {
+		fmt.Println(color.Red.Sprintf("Error: %s", err.Error()))
+		os.Exit(1)
+	}
 }
 
 // ShowConfig show config
 func ShowConfig(dataId string, content string) {
 	paddingLength := (TotalLength - len(dataId)) / 2
-	fmt.Println(strings.Repeat("=", paddingLength) + dataId + strings.Repeat("=", TotalLength-len(dataId)-paddingLength))
+	fmt.Println(
+		strings.Repeat("=", paddingLength) + dataId + strings.Repeat(
+			"=", TotalLength-len(dataId)-paddingLength,
+		),
+	)
 	fmt.Println(content)
 	fmt.Println(strings.Repeat("=", TotalLength))
 }
 
-// TableShow show table
-func TableShow(header []string, data [][]string) {
+// ShowTable show table
+func ShowTable(header []string, data [][]string) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(header)
 	table.AppendBulk(data)
@@ -131,4 +141,15 @@ func GenBytesMD5(bytes []byte) string {
 	h := md5.New()
 	h.Write(bytes)
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+func ToString(val any) string {
+	if reflect.ValueOf(val).Kind() == reflect.Map {
+		jsonData, err := json.Marshal(val)
+		if err != nil {
+			return ""
+		}
+		return text.Wrap(string(jsonData), 30)
+	}
+	return fmt.Sprintf("%v", val)
 }

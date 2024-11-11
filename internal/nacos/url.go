@@ -1,33 +1,46 @@
 package nacos
 
-// 登录 POST
-const loginUrl = "/v1/auth/login"
+// LoginUrl login url
+const LoginUrl = "/v1/auth/login"
 
-const getConfigListUrl = "/v2/cs/history/configs"
+const (
+	// GetConfigListUrl get config list url
+	GetConfigListUrl = "/v2/cs/history/configs"
 
-// 获取配置 GET
-const getConfigUrl = "/v2/cs/config"
+	// GetConfigUrl get config url
+	GetConfigUrl = "/v2/cs/config"
 
-// 发布配置 POST
-const publishConfigUrl = "/v2/cs/config"
+	// PublishConfigUrl publish config url
+	PublishConfigUrl = "/v2/cs/config"
 
-// 删除配置 DELETE
-const deleteConfigUrl = "/v2/cs/config"
+	// DeleteConfigUrl delete config url
+	DeleteConfigUrl = "/v2/cs/config"
+)
 
-// 查询服务列表 GET
-const getServiceListUrl = "/v2/ns/service/list"
+const (
+	// GetServiceListUrl get service list url
+	GetServiceListUrl = "/v2/ns/service/list"
 
-// 查询命名空间列表 GET
-const getNamespaceListUrl = "/v2/console/namespace/list"
+	// GetServiceUrl get service url
+	GetServiceUrl = "/v2/ns/service"
 
-// 查询具体命名空间 GET
-const getNamespaceUrl = "/v2/console/namespace"
+	// GetInstanceListUrl get service instance list url
+	GetInstanceListUrl = "/v2/ns/instance/list"
+)
 
-// 创建命名空间 POST
-const createNamespaceUrl = "/v2/console/namespace"
+const (
+	// GetNamespaceListUrl get namespace list url
+	GetNamespaceListUrl = "/v2/console/namespace/list"
 
-// 编辑命名空间 PUT
-const updateNamespaceUrl = "/v2/console/namespace"
+	// GetNamespaceUrl get namespace url
+	GetNamespaceUrl = "/v2/console/namespace"
 
-// 删除命名空间 DELETE
-const deleteNamespaceUrl = "/v2/console/namespace"
+	// CreateNamespaceUrl create namespace url
+	CreateNamespaceUrl = "/v2/console/namespace"
+
+	// UpdateNamespaceUrl update namespace url
+	UpdateNamespaceUrl = "/v2/console/namespace"
+
+	// DeleteNamespaceUrl delete namespace url
+	DeleteNamespaceUrl = "/v2/console/namespace"
+)
