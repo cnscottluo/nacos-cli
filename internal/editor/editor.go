@@ -30,7 +30,7 @@ func (e Editor) LaunchTempFile(prefix, suffix string, r io.Reader) ([]byte, stri
 		return nil, "", err
 	}
 	path := file.Name()
-	internal.Log("temp file created: %s", path)
+	internal.VerboseLog("temp file created: %s", path)
 	if _, err := io.Copy(file, r); err != nil {
 		_ = os.Remove(path)
 		return nil, "", err

@@ -165,8 +165,8 @@ var configEditCmd = &cobra.Command{
 		dataId := args[0]
 		content, err := nacosClient.GetConfig(dataId)
 		internal.CheckErr(err)
-		originMD5 := internal.Md5String(content)
-		internal.Log("origin config md5: %s", originMD5)
+		originMD5 := internal.GenStringMD5(content)
+		internal.VerboseLog("origin config md5: %s", originMD5)
 
 		// use default editor
 		editor := editor.NewDefaultEditor([]string{})
@@ -177,14 +177,14 @@ var configEditCmd = &cobra.Command{
 		editedContent, filePath, err := editor.LaunchTempFile(fmt.Sprintf("%s-edit-", filepath.Base(os.Args[0])), dataId, buf)
 		internal.CheckErr(err)
 
-		editedMD5 := internal.Md5Bytes(editedContent)
+		editedMD5 := internal.GenBytesMD5(editedContent)
 		if originMD5 == editedMD5 {
-			internal.Log("no change")
+			internal.VerboseLog("no change")
 			return
 		}
 		defer func(f string) {
 			if e := os.Remove(f); e != nil {
-				internal.Log("delete temp filePath %s error: %s", f, e)
+				internal.VerboseLog("delete temp filePath %s error: %s", f, e)
 			}
 		}(filePath)
 		_, err = nacosClient.PublishConfig(dataId, string(editedContent), configType)

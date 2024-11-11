@@ -4,66 +4,75 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"github.com/go-resty/resty/v2"
-	"github.com/olekukonko/tablewriter"
-	"github.com/spf13/cobra"
 	"io"
 	"os"
 	"strings"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/olekukonko/tablewriter"
+	"github.com/spf13/cobra"
 )
 
-const totalLength = 80
+// TotalLength is the total length of the log
+const TotalLength = 80
 
+// Verbose is verbose mode
 var Verbose bool
 
-func Log(format string, args ...any) {
+// VerboseLog print verbose log
+func VerboseLog(format string, args ...any) {
 	if Verbose {
-		fmt.Println(format, args)
+		fmt.Printf(format+"\n", args)
 	}
 }
 
-func LogReq(req *resty.Request) {
+// VerboseLogReq print request
+func VerboseLogReq(req *resty.Request) {
 	if Verbose {
-		fmt.Println(strings.Repeat(">", totalLength))
-		fmt.Println("URL: ", req.URL)
-		fmt.Println("Method: ", req.Method)
-		fmt.Println("Query Params: ", req.QueryParam)
-		fmt.Println("FormData: ", req.FormData)
-		fmt.Println("Body: ", req.Body)
+		fmt.Println(strings.Repeat(">", TotalLength))
+		fmt.Printf("URL: %s\n", req.URL)
+		fmt.Printf("Method: %s\n", req.Method)
+		fmt.Printf("Query Params: %+v\n", req.QueryParam)
+		fmt.Printf("FormData: %+v\n", req.FormData)
+		fmt.Printf("Body: %v\n", req.Body)
 		fmt.Println()
 	}
 }
 
-func LogRes(res *resty.Response) {
+// VerboseLogRes print response
+func VerboseLogRes(res *resty.Response) {
 	if Verbose {
-		fmt.Println(strings.Repeat("<", totalLength))
-		fmt.Println("URL: ", res.Request.URL)
-		fmt.Println("Res: ", string(res.Body()))
+		fmt.Println(strings.Repeat("<", TotalLength))
+		fmt.Printf("URL: %s\n", res.Request.URL)
+		fmt.Printf("Res: %s\n", string(res.Body()))
 		fmt.Println()
 	}
 }
 
+// Info print info
 func Info(format string, args ...any) {
-	_, _ = fmt.Fprintf(os.Stdout, format+"\n", args...)
+	fmt.Printf(format+"\n", args...)
 }
 
+// Error print error
 func Error(format string, args ...any) {
-	_, _ = fmt.Fprintf(os.Stderr, format+"\n", args...)
-	os.Exit(1)
+	fmt.Fprintf(os.Stderr, format+"\n", args...)
 }
 
+// CheckErr check error
 func CheckErr(err error) {
 	cobra.CheckErr(err)
 }
 
+// ShowConfig show config
 func ShowConfig(dataId string, content string) {
-	const totalLength = 80
-	paddingLength := (totalLength - len(dataId)) / 2
-	fmt.Println(strings.Repeat("=", paddingLength) + dataId + strings.Repeat("=", totalLength-len(dataId)-paddingLength))
+	paddingLength := (TotalLength - len(dataId)) / 2
+	fmt.Println(strings.Repeat("=", paddingLength) + dataId + strings.Repeat("=", TotalLength-len(dataId)-paddingLength))
 	fmt.Println(content)
-	fmt.Println(strings.Repeat("=", totalLength))
+	fmt.Println(strings.Repeat("=", TotalLength))
 }
 
+// TableShow show table
 func TableShow(header []string, data [][]string) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(header)
@@ -71,6 +80,7 @@ func TableShow(header []string, data [][]string) {
 	table.Render()
 }
 
+// GenData generate data
 func GenData[T any](data *[]T, trans func(T) []string) [][]string {
 	var result [][]string
 	for _, item := range *data {
@@ -79,10 +89,12 @@ func GenData[T any](data *[]T, trans func(T) []string) [][]string {
 	return result
 }
 
+// SaveConfig save config
 func SaveConfig(dataId string, result string) {
 	_ = os.WriteFile(dataId, []byte(result), 0644)
 }
 
+// Bool2String bool to string
 func Bool2String(success bool) string {
 	if success {
 		return "success"
@@ -91,6 +103,7 @@ func Bool2String(success bool) string {
 	}
 }
 
+// ReadFile read file
 func ReadFile(path string) (string, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -106,13 +119,15 @@ func ReadFile(path string) (string, error) {
 	return string(content), nil
 }
 
-func Md5String(str string) string {
+// GenStringMD5 md5 string
+func GenStringMD5(str string) string {
 	h := md5.New()
 	h.Write([]byte(str))
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func Md5Bytes(bytes []byte) string {
+// GenBytesMD5 md5 bytes
+func GenBytesMD5(bytes []byte) string {
 	h := md5.New()
 	h.Write(bytes)
 	return hex.EncodeToString(h.Sum(nil))

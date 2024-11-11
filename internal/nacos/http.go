@@ -29,11 +29,11 @@ func NewHttpClient(config *types.Config, owner *Client) *HttpClient {
 		if len(config.Nacos.Username) != 0 && len(config.Nacos.Password) != 0 && !IsLogin(req.URL) {
 			req.SetQueryParam("accessToken", config.Nacos.Token)
 		}
-		internal.LogReq(req)
+		internal.VerboseLogReq(req)
 		return nil
 	})
 	webClient.OnAfterResponse(func(c *resty.Client, res *resty.Response) error {
-		internal.LogRes(res)
+		internal.VerboseLogRes(res)
 		url := res.Request.URL
 
 		// login url intercept
@@ -56,7 +56,7 @@ func NewHttpClient(config *types.Config, owner *Client) *HttpClient {
 				parse, err := nurl.Parse(url)
 				internal.CheckErr(err)
 				reUrl := fmt.Sprintf("%s://%s%s", parse.Scheme, parse.Host, parse.Path)
-				internal.Log("re-url: %s", reUrl)
+				internal.VerboseLog("re-url: %s", reUrl)
 				res.Request.SetCookies(nil)
 				_, _ = res.Request.Execute(res.Request.Method, reUrl)
 				return nil

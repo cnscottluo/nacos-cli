@@ -34,7 +34,7 @@ var nsGetCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if all {
-			internal.Log("get all namespaces")
+			internal.VerboseLog("get all namespaces")
 			result, err := nacosClient.GetNamespaces()
 			internal.CheckErr(err)
 			internal.TableShow([]string{"Namespace", "Name", "Desc", "Quota", "Count", "Type"}, internal.GenData(result, func(resp nacos.NamespaceResp) []string {
@@ -59,7 +59,7 @@ var nsGetCmd = &cobra.Command{
 				}
 			}))
 		} else {
-			internal.Log("get namespace %s", args[0])
+			internal.VerboseLog("get namespace %s", args[0])
 			result, err := nacosClient.GetNamespace(args[0])
 			internal.CheckErr(err)
 			internal.TableShow([]string{"Namespace", "Name", "Desc", "Quota", "Count", "Type"}, internal.GenData(&[]nacos.NamespaceResp{*result}, func(resp nacos.NamespaceResp) []string {
@@ -98,7 +98,7 @@ var nsCreateCmd = &cobra.Command{
 		if len(args) == 3 {
 			namespaceDesc = args[2]
 		}
-		internal.Log("create namespace %s %s %s", namespaceId, namespaceName, namespaceDesc)
+		internal.VerboseLog("create namespace %s %s %s", namespaceId, namespaceName, namespaceDesc)
 		_, err := nacosClient.CreateNamespace(namespaceId, namespaceName, namespaceDesc)
 		internal.CheckErr(err)
 		internal.Info("create namespace %s success", namespaceId)
@@ -116,7 +116,7 @@ var updateCmd = &cobra.Command{
 		if len(args) == 3 {
 			namespaceDesc = args[2]
 		}
-		internal.Log("update namespace %s %s %s", namespaceId, namespaceName, namespaceDesc)
+		internal.VerboseLog("update namespace %s %s %s", namespaceId, namespaceName, namespaceDesc)
 		_, err := nacosClient.UpdateNamespace(namespaceId, namespaceName, namespaceDesc)
 		internal.CheckErr(err)
 		internal.Info("update namespace %s success", namespaceId)
@@ -128,7 +128,7 @@ var nsDeleteCmd = &cobra.Command{
 	Short: "delete namespace",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		internal.Log("delete namespace %s", args[0])
+		internal.VerboseLog("delete namespace %s", args[0])
 		_, err := nacosClient.DeleteNamespace(args[0])
 		internal.CheckErr(err)
 		internal.Info("delete namespace %s success", args[0])
