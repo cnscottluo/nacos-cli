@@ -1,4 +1,4 @@
-# Nacos ClL
+# Nacos CLI
 
 [Documentation](docs/nacos-cli.md)
 
