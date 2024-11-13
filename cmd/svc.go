@@ -21,8 +21,11 @@ var svcListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list services",
 	Long:  `list services.`,
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		return checkAddr()
+	},
 	Run: func(cmd *cobra.Command, args []string) {
-		services, err := nacosClient.GetServices(namespaceId, groupName)
+		services, err := nacosClient.GetServices(namespace, group)
 		internal.CheckErr(err)
 		internal.ShowTable(
 			[]string{"Service"}, internal.GenData(
@@ -46,9 +49,12 @@ var svcGetCmd = &cobra.Command{
 		}
 		return nil
 	},
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		return checkAddr()
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceName := args[0]
-		service, err := nacosClient.GetService(namespaceId, groupName, serviceName)
+		service, err := nacosClient.GetService(namespace, group, serviceName)
 		internal.CheckErr(err)
 		internal.ShowTable(
 			[]string{
@@ -82,9 +88,12 @@ var svcInsCmd = &cobra.Command{
 		}
 		return nil
 	},
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		return checkAddr()
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceName := args[0]
-		instances, err := nacosClient.GetServiceInstances(namespaceId, groupName, serviceName)
+		instances, err := nacosClient.GetServiceInstances(namespace, group, serviceName)
 		internal.CheckErr(err)
 		internal.ShowTable(
 			[]string{
@@ -114,6 +123,6 @@ func init() {
 	svcCmd.AddCommand(svcGetCmd)
 	svcCmd.AddCommand(svcInsCmd)
 
-	svcCmd.PersistentFlags().StringVarP(&namespaceId, "namespace-id", "n", "", "namespace id")
-	svcCmd.PersistentFlags().StringVarP(&groupName, "group-name", "g", "", "group name")
+	svcCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "namespace")
+	svcCmd.PersistentFlags().StringVarP(&group, "group", "g", "", "group")
 }

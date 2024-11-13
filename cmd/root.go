@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"os"
 
 	"github.com/cnscottluo/nacos-cli/internal"
@@ -13,9 +14,10 @@ import (
 var cfgFile string
 var nacosClient *nacos.Client
 var (
-	namespaceId string
-	groupName   string
+	namespace string
+	group     string
 )
+var config = new(types.Config)
 
 var rootCmd = &cobra.Command{
 	Use:           "nacos-cli",
@@ -28,6 +30,10 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
+	// e := doc.GenMarkdownTree(rootCmd, "./docs")
+	// if e != nil {
+	// 	log.Fatal(e)
+	// }
 	err := rootCmd.Execute()
 	if err != nil {
 		internal.Error("%s", err)
@@ -56,7 +62,6 @@ func initConfig() {
 		internal.VerboseLog("Using config file: %s", viper.ConfigFileUsed())
 	}
 
-	var config = new(types.Config)
 	err := viper.Unmarshal(config)
 	internal.CheckErr(err)
 	nacosClient = nacos.NewClient(config)
@@ -64,4 +69,11 @@ func initConfig() {
 	for key, value := range viper.AllSettings() {
 		internal.VerboseLog("%s: %+v", key, value)
 	}
+}
+
+func checkAddr() error {
+	if len(config.Nacos.Addr) == 0 {
+		return errors.New("nacos addr is required, place execute init command to initialize config")
+	}
+	return nil
 }

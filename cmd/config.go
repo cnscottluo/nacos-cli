@@ -31,16 +31,19 @@ var configCmd = &cobra.Command{
 	},
 }
 
-// list config in namespaceId
+// list config in namespace
 var configListCmd = &cobra.Command{
-	Use:   "list [namespaceId]",
-	Short: "list config in namespaceId",
-	Long:  `list config in namespaceId.`,
+	Use:   "list [namespace]",
+	Short: "list config in namespace",
+	Long:  `list config in namespace.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 1 {
 			return errors.New("too many arguments")
 		}
 		return nil
+	},
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		return checkAddr()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var namespaceId string
@@ -77,9 +80,12 @@ var configGetCmd = &cobra.Command{
 		}
 		return nil
 	},
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		return checkAddr()
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		dataId := args[0]
-		content, err := nacosClient.GetConfig(namespaceId, groupName, dataId)
+		content, err := nacosClient.GetConfig(namespace, group, dataId)
 		internal.CheckErr(err)
 		internal.ShowConfig(dataId, content)
 		if save {
@@ -102,9 +108,12 @@ var configDeleteCmd = &cobra.Command{
 		}
 		return nil
 	},
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		return checkAddr()
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		dataId := args[0]
-		_, err := nacosClient.DeleteConfig(namespaceId, groupName, dataId)
+		_, err := nacosClient.DeleteConfig(namespace, group, dataId)
 		internal.CheckErr(err)
 		internal.Info("delete config %s success(maybe error result)", dataId)
 	},
@@ -125,6 +134,9 @@ var configApplyCmd = &cobra.Command{
 		return nil
 	},
 	PreRunE: func(cmd *cobra.Command, args []string) error {
+		if err := checkAddr(); err != nil {
+			return err
+		}
 		file := args[0]
 		if len(dataId) == 0 {
 			dataId = nacos.DetermineDataId(file)
@@ -143,7 +155,7 @@ var configApplyCmd = &cobra.Command{
 		file := args[0]
 		content, err := internal.ReadFile(file)
 		internal.CheckErr(err)
-		_, err = nacosClient.ApplyConfig(namespaceId, groupName, dataId, content, configType)
+		_, err = nacosClient.ApplyConfig(namespace, group, dataId, content, configType)
 		internal.CheckErr(err)
 		internal.Info("apply config %s success", dataId)
 	},
@@ -164,6 +176,9 @@ var configEditCmd = &cobra.Command{
 		return nil
 	},
 	PreRunE: func(cmd *cobra.Command, args []string) error {
+		if err := checkAddr(); err != nil {
+			return err
+		}
 		dataId := args[0]
 		if len(configType) == 0 {
 			configType = nacos.DetermineConfigType(dataId)
@@ -177,7 +192,7 @@ var configEditCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		dataId := args[0]
-		content, err := nacosClient.GetConfig(namespaceId, groupName, dataId)
+		content, err := nacosClient.GetConfig(namespace, group, dataId)
 		internal.CheckErr(err)
 		originMD5 := internal.GenStringMD5(content)
 		internal.VerboseLog("origin config md5: %s", originMD5)
@@ -202,7 +217,7 @@ var configEditCmd = &cobra.Command{
 		if originMD5 == editedMD5 {
 			internal.VerboseLog("no change")
 		} else {
-			_, err = nacosClient.ApplyConfig(namespaceId, groupName, dataId, string(editedContent), configType)
+			_, err = nacosClient.ApplyConfig(namespace, group, dataId, string(editedContent), configType)
 			internal.CheckErr(err)
 			internal.Info("edit config %s success", dataId)
 		}
@@ -218,21 +233,21 @@ func init() {
 	configCmd.AddCommand(configEditCmd)
 
 	configGetCmd.Flags().BoolVarP(&save, "save", "s", false, "save config to current directory")
-	configGetCmd.Flags().StringVarP(&namespaceId, "namespace-id", "n", "", "namespace id")
-	configGetCmd.Flags().StringVarP(&groupName, "group-name", "g", "", "group name")
+	configGetCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "namespace")
+	configGetCmd.Flags().StringVarP(&group, "group", "g", "", "group")
 
-	configDeleteCmd.Flags().StringVarP(&namespaceId, "namespace-id", "n", "", "namespace id")
-	configDeleteCmd.Flags().StringVarP(&groupName, "group-name", "g", "", "group name")
+	configDeleteCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "namespace")
+	configDeleteCmd.Flags().StringVarP(&group, "group", "g", "", "group")
 
-	configApplyCmd.Flags().StringVarP(&namespaceId, "namespace-id", "n", "", "namespace id")
-	configApplyCmd.Flags().StringVarP(&groupName, "group-name", "g", "", "group name")
+	configApplyCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "namespace")
+	configApplyCmd.Flags().StringVarP(&group, "group", "g", "", "group")
 	configApplyCmd.Flags().StringVarP(&dataId, "data-id", "d", "", "config data id")
 	configApplyCmd.Flags().StringVarP(
 		&configType, "type", "t", "", "config type (text,json,xml,yaml,html,properties)",
 	)
 
-	configEditCmd.Flags().StringVarP(&namespaceId, "namespace-id", "n", "", "namespace id")
-	configEditCmd.Flags().StringVarP(&groupName, "group-name", "g", "", "group name")
+	configEditCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "namespace")
+	configEditCmd.Flags().StringVarP(&group, "group", "g", "", "group")
 	configEditCmd.Flags().StringVarP(
 		&configType, "type", "t", "", "config type (text,json,xml,yaml,html,properties)",
 	)
