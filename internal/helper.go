@@ -32,12 +32,14 @@ func VerboseLog(format string, args ...any) {
 // VerboseLogReq print request
 func VerboseLogReq(req *resty.Request) {
 	if Verbose {
+		fmt.Println()
 		fmt.Println(strings.Repeat(">", TotalLength))
 		fmt.Printf("URL: %s\n", req.URL)
 		fmt.Printf("Method: %s\n", req.Method)
 		fmt.Printf("Query Params: %+v\n", req.QueryParam)
 		fmt.Printf("FormData: %+v\n", req.FormData)
 		fmt.Printf("Body: %v\n", req.Body)
+		fmt.Println(strings.Repeat(">", TotalLength))
 		fmt.Println()
 	}
 }
@@ -45,27 +47,30 @@ func VerboseLogReq(req *resty.Request) {
 // VerboseLogRes print response
 func VerboseLogRes(res *resty.Response) {
 	if Verbose {
+		fmt.Println()
 		fmt.Println(strings.Repeat("<", TotalLength))
 		fmt.Printf("URL: %s\n", res.Request.URL)
+		fmt.Printf("StatusCode: %d\n", res.StatusCode())
 		fmt.Printf("Res: %s\n", string(res.Body()))
+		fmt.Println(strings.Repeat("<", TotalLength))
 		fmt.Println()
 	}
 }
 
 // Info print info
 func Info(format string, args ...any) {
-	fmt.Println(color.Green.Sprintf(format, args))
+	fmt.Println(color.Green.Sprintf("【Success】"+format, args...))
 }
 
 // Error print error
 func Error(format string, args ...any) {
-	fmt.Println(color.Red.Sprintf("Error: "+format, args...))
+	fmt.Println(color.Red.Sprintf("【Error】"+format, args...))
 }
 
 // CheckErr check error
 func CheckErr(err error) {
 	if err != nil {
-		fmt.Println(color.Red.Sprintf("Error: %s", err.Error()))
+		Error("%s", err.Error())
 		os.Exit(1)
 	}
 }

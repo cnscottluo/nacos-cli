@@ -39,7 +39,17 @@ func IsValidConfigType(configType string) bool {
 	}
 }
 
-// IsLogin checks if the url is a login url.
-func IsLogin(url string) bool {
+// IsLoginApi checks if the url is a login url.
+func IsLoginApi(url string) bool {
 	return strings.Contains(url, LoginUrl)
+}
+
+// IsV1Api check if the url is a v1 api
+func IsV1Api(url string) bool {
+	return strings.Contains(url, "/v1/")
+}
+
+// IsV2Api check if the url is a v2 api
+func IsV2Api(url string) bool {
+	return strings.Contains(url, "/v2/")
 }

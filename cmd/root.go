@@ -2,12 +2,14 @@ package cmd
 
 import (
 	"errors"
+	"log"
 	"os"
 
 	"github.com/cnscottluo/nacos-cli/internal"
 	"github.com/cnscottluo/nacos-cli/internal/nacos"
 	"github.com/cnscottluo/nacos-cli/internal/types"
 	"github.com/spf13/cobra"
+	"github.com/spf13/cobra/doc"
 	"github.com/spf13/viper"
 )
 
@@ -30,10 +32,10 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
-	// e := doc.GenMarkdownTree(rootCmd, "./docs")
-	// if e != nil {
-	// 	log.Fatal(e)
-	// }
+	e := doc.GenMarkdownTree(rootCmd, "./docs")
+	if e != nil {
+		log.Fatal(e)
+	}
 	err := rootCmd.Execute()
 	if err != nil {
 		internal.Error("%s", err)

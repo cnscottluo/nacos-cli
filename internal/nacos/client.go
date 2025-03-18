@@ -34,6 +34,19 @@ func (client *Client) Login(addr string, username string, password string) (*Log
 	return r, nil
 }
 
+func (client *Client) UpdatePassword(username string, password string) (string, error) {
+	r, err := Put[R[string]](
+		client.httpClient, client.config.Nacos.Addr+UserUrl, map[string]string{
+			"username":    username,
+			"newPassword": password,
+		},
+	)
+	if err != nil {
+		return "", err
+	}
+	return *r.Data, nil
+}
+
 // GetNamespaces get namespaces
 func (client *Client) GetNamespaces() (*[]NamespaceResp, error) {
 	r, err := Get[R[[]NamespaceResp]](client.httpClient, client.config.Nacos.Addr+GetNamespaceListUrl, nil)
