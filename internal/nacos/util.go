@@ -44,6 +44,16 @@ func IsLoginApi(url string) bool {
 	return strings.Contains(url, LoginUrl)
 }
 
+// IsNoAuthApi checks if the url is a no auth url.
+func IsNoAuthApi(url string) bool {
+	for _, u := range NoAuthUrl {
+		if strings.Contains(url, u) {
+			return true
+		}
+	}
+	return false
+}
+
 // IsV1Api check if the url is a v1 api
 func IsV1Api(url string) bool {
 	return strings.Contains(url, "/v1/")

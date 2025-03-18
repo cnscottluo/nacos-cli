@@ -47,6 +47,20 @@ func (client *Client) UpdatePassword(username string, password string) (string, 
 	return *r.Data, nil
 }
 
+// InitAdmin init admin
+func (client *Client) InitAdmin(password string) (string, error) {
+	r, err := Post[map[string]interface{}](
+		client.httpClient, client.config.Nacos.Addr+AdminUrl, map[string]string{
+			"password": password,
+		},
+	)
+	if err != nil {
+		return "", err
+	}
+	print(r)
+	return "", nil
+}
+
 // GetNamespaces get namespaces
 func (client *Client) GetNamespaces() (*[]NamespaceResp, error) {
 	r, err := Get[R[[]NamespaceResp]](client.httpClient, client.config.Nacos.Addr+GetNamespaceListUrl, nil)

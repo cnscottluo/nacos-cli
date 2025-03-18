@@ -27,7 +27,7 @@ func NewHttpClient(config *types.Config, owner *Client) *HttpClient {
 	}
 	webClient.OnBeforeRequest(
 		func(c *resty.Client, req *resty.Request) error {
-			if len(config.Nacos.Username) != 0 && len(config.Nacos.Password) != 0 && !IsLoginApi(req.URL) {
+			if len(config.Nacos.Username) != 0 && len(config.Nacos.Password) != 0 && !IsNoAuthApi(req.URL) {
 				req.SetQueryParam("accessToken", config.Nacos.Token)
 			}
 			internal.VerboseLogReq(req)
@@ -44,7 +44,20 @@ func NewHttpClient(config *types.Config, owner *Client) *HttpClient {
 				if res.StatusCode() != 200 {
 					return fmt.Errorf("%s", res.Body())
 				} else {
-					return nil
+					// return nil
+					var result map[string]any
+					err := json.Unmarshal(res.Body(), &result)
+					if err != nil {
+						return errors.New(string(res.Body()))
+					}
+
+					if value, exists := result["code"]; exists {
+						if fmt.Sprintf("%v", value) != "0" {
+							return errors.New(result["data"].(string))
+						}
+					} else {
+						return errors.New(result["error"].(string))
+					}
 				}
 			}
 

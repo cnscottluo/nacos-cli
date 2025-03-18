@@ -6,6 +6,11 @@ const LoginUrl = "/v1/auth/login"
 // UserUrl user url
 const UserUrl = "/v1/auth/users"
 
+// AdminUrl admin url
+const AdminUrl = "/v1/auth/admin"
+
+var NoAuthUrl = []string{LoginUrl, AdminUrl}
+
 const (
 	// GetConfigListUrl get config list url
 	GetConfigListUrl = "/v2/cs/history/configs"

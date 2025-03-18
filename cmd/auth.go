@@ -13,7 +13,7 @@ import (
 
 var auth bool
 
-var initCmd = &cobra.Command{
+var authCmd = &cobra.Command{
 	Use:   "init [addr] [username] [password] [namespace] [group]",
 	Short: "init nacos",
 	Long: `init nacos.
@@ -90,6 +90,6 @@ func setArgs(args []string) {
 }
 
 func init() {
-	rootCmd.AddCommand(initCmd)
-	initCmd.Flags().BoolVar(&auth, "auth", false, "use username and password to authenticate")
+	rootCmd.AddCommand(authCmd)
+	authCmd.Flags().BoolVar(&auth, "auth", false, "use username and password to authenticate")
 }
