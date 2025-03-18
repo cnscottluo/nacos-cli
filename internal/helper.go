@@ -2,10 +2,14 @@ package internal
 
 import (
 	"crypto/md5"
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/big"
+	mrand "math/rand"
 	"os"
 	"reflect"
 	"strings"
@@ -59,12 +63,12 @@ func VerboseLogRes(res *resty.Response) {
 
 // Info print info
 func Info(format string, args ...any) {
-	fmt.Println(color.Green.Sprintf("【Success】"+format, args...))
+	fmt.Println(color.Green.Sprintf("【Success】\n"+format, args...))
 }
 
 // Error print error
 func Error(format string, args ...any) {
-	fmt.Println(color.Red.Sprintf("【Error】"+format, args...))
+	fmt.Println(color.Red.Sprintf("【Error】\n"+format, args...))
 }
 
 // CheckErr check error
@@ -157,4 +161,62 @@ func ToString(val any) string {
 		return text.Wrap(string(jsonData), 30)
 	}
 	return fmt.Sprintf("%v", val)
+}
+
+// GenerateAESKey generates a 256-bit AES key
+func GenerateAESKey() ([]byte, error) {
+	key := make([]byte, 32)
+	_, err := io.ReadFull(rand.Reader, key)
+	if err != nil {
+		return nil, err
+	}
+	return key, nil
+}
+
+// Base64Encode encodes the given data to a base64 string
+func Base64Encode(data []byte) string {
+	return base64.StdEncoding.EncodeToString(data)
+}
+
+// GenerateIdentity generates an identity key and value
+func GenerateIdentity(keyLen uint8, valueLen uint8, symbolsLen uint8) (string, string, error) {
+	const (
+		letters = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
+		numbers = "23456789"
+		symbols = "!@#$%^&*()_+-="
+	)
+
+	key := make([]byte, keyLen)
+	for i := uint8(0); i < keyLen; i++ {
+		key[i] = letters[randomInt(len(letters))]
+	}
+	keyStr := strings.ToUpper(string(key))
+
+	value := make([]byte, valueLen)
+	value[0] = letters[randomInt(len(letters))]
+	value[1] = numbers[randomInt(len(numbers))]
+	for i := uint8(0); i < symbolsLen; i++ {
+		value[i+2] = symbols[randomInt(len(symbols))]
+	}
+	charset := letters + numbers
+	for i := 2 + symbolsLen; i < valueLen; i++ {
+		value[i] = charset[randomInt(len(charset))]
+	}
+	mrand.Shuffle(
+		len(value), func(i, j int) {
+			value[i], value[j] = value[j], value[i]
+		},
+	)
+	valueStr := string(value)
+
+	return keyStr, valueStr, nil
+}
+
+// randomInt returns a random integer in the range [0, max)
+func randomInt(max int) int {
+	n, err := rand.Int(rand.Reader, big.NewInt(int64(max)))
+	if err != nil {
+		panic(err)
+	}
+	return int(n.Int64())
 }
