@@ -34,7 +34,8 @@ func (client *Client) Login(addr string, username string, password string) (*Log
 	return r, nil
 }
 
-func (client *Client) UpdatePassword(username string, password string) (string, error) {
+// UpdateUser update user
+func (client *Client) UpdateUser(username string, password string) (string, error) {
 	r, err := Put[R[string]](
 		client.httpClient, client.config.Nacos.Addr+UserUrl, map[string]string{
 			"username":    username,
@@ -48,17 +49,16 @@ func (client *Client) UpdatePassword(username string, password string) (string, 
 }
 
 // InitAdmin init admin
-func (client *Client) InitAdmin(password string) (string, error) {
-	r, err := Post[map[string]interface{}](
+func (client *Client) InitAdmin(password string) (*InitAdminResp, error) {
+	r, err := Post[InitAdminResp](
 		client.httpClient, client.config.Nacos.Addr+AdminUrl, map[string]string{
 			"password": password,
 		},
 	)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	print(r)
-	return "", nil
+	return r, nil
 }
 
 // GetNamespaces get namespaces

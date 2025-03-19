@@ -24,7 +24,6 @@ nacos-cli [flags]
 * [nacos-cli gen](nacos-cli_gen.md)	 - Generate secret key, identity key and value.
 * [nacos-cli init](nacos-cli_init.md)	 - init nacos
 * [nacos-cli ns](nacos-cli_ns.md)	 - namespace management
-* [nacos-cli pass](nacos-cli_pass.md)	 - user password management
 * [nacos-cli svc](nacos-cli_svc.md)	 - service management
 * [nacos-cli user](nacos-cli_user.md)	 - User management
 

@@ -12,6 +12,11 @@ type LoginResp struct {
 	Username    string `json:"username"`
 }
 
+type InitAdminResp struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 type NamespaceResp struct {
 	Namespace         string `json:"namespace"`
 	NamespaceShowName string `json:"namespaceShowName"`

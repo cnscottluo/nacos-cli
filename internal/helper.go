@@ -63,12 +63,12 @@ func VerboseLogRes(res *resty.Response) {
 
 // Info print info
 func Info(format string, args ...any) {
-	fmt.Println(color.Green.Sprintf("【Success】\n"+format, args...))
+	fmt.Println(color.Green.Sprintf(format, args...))
 }
 
 // Error print error
 func Error(format string, args ...any) {
-	fmt.Println(color.Red.Sprintf("【Error】\n"+format, args...))
+	fmt.Println(color.Red.Sprintf(format, args...))
 }
 
 // CheckErr check error

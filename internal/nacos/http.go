@@ -27,7 +27,7 @@ func NewHttpClient(config *types.Config, owner *Client) *HttpClient {
 	}
 	webClient.OnBeforeRequest(
 		func(c *resty.Client, req *resty.Request) error {
-			if len(config.Nacos.Username) != 0 && len(config.Nacos.Password) != 0 && !IsNoAuthApi(req.URL) {
+			if config.Nacos.Token != "" && !IsNoAuthApi(req.URL) {
 				req.SetQueryParam("accessToken", config.Nacos.Token)
 			}
 			internal.VerboseLogReq(req)
@@ -39,63 +39,37 @@ func NewHttpClient(config *types.Config, owner *Client) *HttpClient {
 			internal.VerboseLogRes(res)
 			url := res.Request.URL
 
-			// v1 api intercept
-			if IsV1Api(url) {
-				if res.StatusCode() != 200 {
-					return fmt.Errorf("%s", res.Body())
-				} else {
-					// return nil
-					var result map[string]any
-					err := json.Unmarshal(res.Body(), &result)
-					if err != nil {
-						return errors.New(string(res.Body()))
-					}
-
-					if value, exists := result["code"]; exists {
-						if fmt.Sprintf("%v", value) != "0" {
-							return errors.New(result["data"].(string))
-						}
-					} else {
-						return errors.New(result["error"].(string))
+			if res.StatusCode() == 200 {
+				var result map[string]any
+				err := json.Unmarshal(res.Body(), &result)
+				if err != nil {
+					return errors.New("json unmarshal error : " + string(res.Body()))
+				}
+				if value, exists := result["code"]; exists {
+					if fmt.Sprintf("%v", value) != "0" {
+						return errors.New(result["data"].(string))
 					}
 				}
+				return nil
+			} else if res.StatusCode() == 403 && !IsLoginApi(url) {
+				loginResp, err := client.owner.Login(
+					config.Nacos.Addr, config.Nacos.Username, config.Nacos.Password,
+				)
+				internal.CheckErr(err)
+				config.Nacos.Token = loginResp.AccessToken
+				viper.Set("nacos.token", loginResp.AccessToken)
+				err = viper.WriteConfig()
+				internal.CheckErr(err)
+				parse, err := nurl.Parse(url)
+				internal.CheckErr(err)
+				reUrl := fmt.Sprintf("%s://%s%s", parse.Scheme, parse.Host, parse.Path)
+				internal.VerboseLog("re-url: %s", reUrl)
+				res.Request.SetCookies(nil)
+				_, _ = res.Request.Execute(res.Request.Method, reUrl)
+				return nil
+			} else {
+				return fmt.Errorf("%s", res.Body())
 			}
-
-			// v2 api intercept
-			if IsV2Api(url) {
-				if res.StatusCode() == 403 {
-					loginResp, err := client.owner.Login(
-						config.Nacos.Addr, config.Nacos.Username, config.Nacos.Password,
-					)
-					internal.CheckErr(err)
-					config.Nacos.Token = loginResp.AccessToken
-					viper.Set("nacos.token", loginResp.AccessToken)
-					err = viper.WriteConfig()
-					internal.CheckErr(err)
-					parse, err := nurl.Parse(url)
-					internal.CheckErr(err)
-					reUrl := fmt.Sprintf("%s://%s%s", parse.Scheme, parse.Host, parse.Path)
-					internal.VerboseLog("re-url: %s", reUrl)
-					res.Request.SetCookies(nil)
-					_, _ = res.Request.Execute(res.Request.Method, reUrl)
-					return nil
-				} else {
-					var result map[string]any
-					err := json.Unmarshal(res.Body(), &result)
-					if err != nil {
-						return errors.New(string(res.Body()))
-					}
-
-					if value, exists := result["code"]; exists {
-						if fmt.Sprintf("%v", value) != "0" {
-							return errors.New(result["data"].(string))
-						}
-					} else {
-						return errors.New(result["error"].(string))
-					}
-				}
-			}
-			return nil
 		},
 	)
 	return client
