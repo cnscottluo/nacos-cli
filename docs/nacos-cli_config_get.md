@@ -1,10 +1,10 @@
 ## nacos-cli config get
 
-get config
+get setting
 
 ### Synopsis
 
-get config.
+get setting.
 
 ```
 nacos-cli config get <dataId> [flags]
@@ -16,14 +16,14 @@ nacos-cli config get <dataId> [flags]
   -g, --group string       group
   -h, --help               help for get
   -n, --namespace string   namespace
-  -s, --save               save config to current directory
+  -s, --save               save setting to current directory
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --config string   config file (default is $HOME/.nacos.toml)
-      --verbose         verbose output
+      --setting string   setting file (default is $HOME/.nacos.toml)
+      --verbose          verbose output
 ```
 
 ### SEE ALSO

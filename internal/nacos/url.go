@@ -12,17 +12,17 @@ const AdminUrl = "/v1/auth/admin"
 var NoAuthUrl = []string{LoginUrl, AdminUrl}
 
 const (
-	// GetConfigListUrl get config list url
+	// GetConfigListUrl get setting list url
 	GetConfigListUrl = "/v2/cs/history/configs"
 
-	// GetConfigUrl get config url
-	GetConfigUrl = "/v2/cs/config"
+	// GetConfigUrl get setting url
+	GetConfigUrl = "/v2/cs/setting"
 
-	// PublishConfigUrl publish config url
-	PublishConfigUrl = "/v2/cs/config"
+	// PublishConfigUrl publish setting url
+	PublishConfigUrl = "/v2/cs/setting"
 
-	// DeleteConfigUrl delete config url
-	DeleteConfigUrl = "/v2/cs/config"
+	// DeleteConfigUrl delete setting url
+	DeleteConfigUrl = "/v2/cs/setting"
 )
 
 const (

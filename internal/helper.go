@@ -79,7 +79,7 @@ func CheckErr(err error) {
 	}
 }
 
-// ShowConfig show config
+// ShowConfig show setting
 func ShowConfig(dataId string, content string) {
 	paddingLength := (TotalLength - len(dataId)) / 2
 	fmt.Println(
@@ -108,7 +108,7 @@ func GenData[T any](data *[]T, trans func(T) []string) [][]string {
 	return result
 }
 
-// SaveConfig save config
+// SaveConfig save setting
 func SaveConfig(dataId string, result string) {
 	_ = os.WriteFile(dataId, []byte(result), 0644)
 }

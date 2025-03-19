@@ -22,8 +22,8 @@ nacos-cli gen identity [flags]
 ### Options inherited from parent commands
 
 ```
-      --config string   config file (default is $HOME/.nacos.toml)
-      --verbose         verbose output
+      --setting string   setting file (default is $HOME/.nacos.toml)
+      --verbose          verbose output
 ```
 
 ### SEE ALSO

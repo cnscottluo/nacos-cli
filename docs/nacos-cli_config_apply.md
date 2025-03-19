@@ -1,10 +1,10 @@
 ## nacos-cli config apply
 
-apply config
+apply setting
 
 ### Synopsis
 
-apply config.
+apply setting.
 
 ```
 nacos-cli config apply <file> [flags]
@@ -13,18 +13,18 @@ nacos-cli config apply <file> [flags]
 ### Options
 
 ```
-  -d, --data-id string     config data id
+  -d, --data-id string     setting data id
   -g, --group string       group
   -h, --help               help for apply
   -n, --namespace string   namespace
-  -t, --type string        config type (text,json,xml,yaml,html,properties)
+  -t, --type string        setting type (text,json,xml,yaml,html,properties)
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --config string   config file (default is $HOME/.nacos.toml)
-      --verbose         verbose output
+      --setting string   setting file (default is $HOME/.nacos.toml)
+      --verbose          verbose output
 ```
 
 ### SEE ALSO

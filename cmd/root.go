@@ -19,6 +19,7 @@ var (
 	namespace string
 	group     string
 )
+
 var config = new(types.Config)
 
 var rootCmd = &cobra.Command{
@@ -36,6 +37,7 @@ func Execute() {
 	if e != nil {
 		log.Fatal(e)
 	}
+	println("执行 execute")
 	err := rootCmd.Execute()
 	if err != nil {
 		internal.Error("%s", err)
@@ -45,7 +47,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.nacos.toml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "setting", "", "setting file (default is $HOME/.nacos.toml)")
 	rootCmd.PersistentFlags().BoolVar(&internal.Verbose, "verbose", false, "verbose output")
 }
 
@@ -54,14 +56,14 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	} else {
 		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
+		internal.CheckErr(err)
 		viper.AddConfigPath(home)
 		viper.SetConfigType("toml")
 		viper.SetConfigName(".nacos")
 	}
 
 	if err := viper.ReadInConfig(); err == nil {
-		internal.VerboseLog("Using config file: %s", viper.ConfigFileUsed())
+		internal.VerboseLog("Using setting file: %s", viper.ConfigFileUsed())
 	}
 
 	err := viper.Unmarshal(config)
@@ -75,7 +77,7 @@ func initConfig() {
 
 func checkAddr() error {
 	if len(config.Nacos.Addr) == 0 {
-		return errors.New("nacos addr is required, place execute init command to initialize config")
+		return errors.New("nacos addr is required, place execute init command to initialize setting")
 	}
 	return nil
 }

@@ -3,6 +3,7 @@ package nacos
 import (
 	"strings"
 
+	"github.com/cnscottluo/nacos-cli/internal/setting"
 	"github.com/cnscottluo/nacos-cli/internal/types"
 )
 
@@ -15,6 +16,8 @@ type Client struct {
 // NewClient new client
 func NewClient(config *types.Config) *Client {
 	client := new(Client)
+	setting.DecryptConfig(config)
+	setting.InitConfig(config)
 	client.config = config
 	client.httpClient = NewHttpClient(config, client)
 	return client
@@ -145,7 +148,7 @@ func (client *Client) GetConfigs(namespaceId string) (*[]ConfigResp, error) {
 	return r.Data, nil
 }
 
-// GetConfig get config
+// GetConfig get setting
 func (client *Client) GetConfig(namespaceId string, group string, dataId string) (string, error) {
 	if len(namespaceId) == 0 {
 		namespaceId = client.config.Nacos.Namespace
@@ -166,7 +169,7 @@ func (client *Client) GetConfig(namespaceId string, group string, dataId string)
 	return *r.Data, nil
 }
 
-// DeleteConfig delete config
+// DeleteConfig delete setting
 func (client *Client) DeleteConfig(namespaceId string, group string, dataId string) (bool, error) {
 	if len(namespaceId) == 0 {
 		namespaceId = client.config.Nacos.Namespace
@@ -187,7 +190,7 @@ func (client *Client) DeleteConfig(namespaceId string, group string, dataId stri
 	return *r.Data, nil
 }
 
-// ApplyConfig publish config
+// ApplyConfig publish setting
 func (client *Client) ApplyConfig(
 	namespaceId string, group string, dataId string, content string, configType string,
 ) (bool, error) {

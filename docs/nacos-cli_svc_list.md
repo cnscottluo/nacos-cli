@@ -19,9 +19,9 @@ nacos-cli svc list [flags]
 ### Options inherited from parent commands
 
 ```
-      --config string      config file (default is $HOME/.nacos.toml)
   -g, --group string       group
   -n, --namespace string   namespace
+      --setting string     setting file (default is $HOME/.nacos.toml)
       --verbose            verbose output
 ```
 

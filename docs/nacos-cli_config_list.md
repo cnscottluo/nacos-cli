@@ -1,10 +1,10 @@
 ## nacos-cli config list
 
-list config in namespace
+list setting in namespace
 
 ### Synopsis
 
-list config in namespace.
+list setting in namespace.
 
 ```
 nacos-cli config list [namespace] [flags]
@@ -19,8 +19,8 @@ nacos-cli config list [namespace] [flags]
 ### Options inherited from parent commands
 
 ```
-      --config string   config file (default is $HOME/.nacos.toml)
-      --verbose         verbose output
+      --setting string   setting file (default is $HOME/.nacos.toml)
+      --verbose          verbose output
 ```
 
 ### SEE ALSO

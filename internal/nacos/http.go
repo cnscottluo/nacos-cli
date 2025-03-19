@@ -7,9 +7,9 @@ import (
 	nurl "net/url"
 
 	"github.com/cnscottluo/nacos-cli/internal"
+	"github.com/cnscottluo/nacos-cli/internal/setting"
 	"github.com/cnscottluo/nacos-cli/internal/types"
 	"github.com/go-resty/resty/v2"
-	"github.com/spf13/viper"
 )
 
 type HttpClient struct {
@@ -46,7 +46,8 @@ func NewHttpClient(config *types.Config, owner *Client) *HttpClient {
 					return errors.New("json unmarshal error : " + string(res.Body()))
 				}
 				if value, exists := result["code"]; exists {
-					if fmt.Sprintf("%v", value) != "0" {
+					codeStr := fmt.Sprintf("%v", value)
+					if codeStr != "0" && codeStr != "200" {
 						return errors.New(result["data"].(string))
 					}
 				}
@@ -57,8 +58,7 @@ func NewHttpClient(config *types.Config, owner *Client) *HttpClient {
 				)
 				internal.CheckErr(err)
 				config.Nacos.Token = loginResp.AccessToken
-				viper.Set("nacos.token", loginResp.AccessToken)
-				err = viper.WriteConfig()
+				err = setting.SaveSetting(loginResp.AccessToken)
 				internal.CheckErr(err)
 				parse, err := nurl.Parse(url)
 				internal.CheckErr(err)
