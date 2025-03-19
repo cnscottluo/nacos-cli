@@ -1,10 +1,6 @@
 ## nacos-cli config delete
 
-delete setting
-
-### Synopsis
-
-delete setting.
+delete config
 
 ```
 nacos-cli config delete <dataId> [flags]
@@ -13,9 +9,9 @@ nacos-cli config delete <dataId> [flags]
 ### Options
 
 ```
-  -g, --group string       group
-  -h, --help               help for delete
-  -n, --namespace string   namespace
+  -g, --group string         group
+  -h, --help                 help for delete
+  -n, --namespaceId string   namespaceId
 ```
 
 ### Options inherited from parent commands

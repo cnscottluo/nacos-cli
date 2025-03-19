@@ -12,7 +12,7 @@ import (
 
 var nsCmd = &cobra.Command{
 	Use:   "ns",
-	Short: "namespace management.",
+	Short: "namespaceId management",
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = cmd.Help()
 	},
@@ -20,7 +20,7 @@ var nsCmd = &cobra.Command{
 
 var nsListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "list namespaces.",
+	Short: "list namespaces",
 	Run: func(cmd *cobra.Command, args []string) {
 		result, err := nacosClient.GetNamespaces()
 		internal.CheckErr(err)
@@ -54,7 +54,7 @@ var nsListCmd = &cobra.Command{
 
 var nsGetCmd = &cobra.Command{
 	Use:   "get [namespaceId]",
-	Short: "get namespace.",
+	Short: "get namespaceId",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 1 {
 			return errors.New("too many arguments")
@@ -62,10 +62,7 @@ var nsGetCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		namespaceId := config.Nacos.Namespace
-		if len(args) == 1 {
-			namespaceId = args[0]
-		}
+		namespaceId = args[0]
 		result, err := nacosClient.GetNamespace(namespaceId)
 		internal.CheckErr(err)
 		internal.ShowTable(
@@ -98,7 +95,7 @@ var nsGetCmd = &cobra.Command{
 
 var nsCreateCmd = &cobra.Command{
 	Use:   "create <namespaceId> <namespaceName> [namespaceDesc]",
-	Short: "create namespace.",
+	Short: "create namespaceId",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 2 || len(args) > 3 {
 			return errors.New("namespaceId and namespaceName args is required")
@@ -114,13 +111,13 @@ var nsCreateCmd = &cobra.Command{
 		}
 		_, err := nacosClient.CreateNamespace(namespaceId, namespaceName, namespaceDesc)
 		internal.CheckErr(err)
-		internal.Info("create namespace %s success", namespaceId)
+		internal.Info("create namespaceId %s success", namespaceId)
 	},
 }
 
-var updateCmd = &cobra.Command{
+var nsUpdateCmd = &cobra.Command{
 	Use:   "update <namespaceId> <namespaceName> [namespaceDesc]",
-	Short: "update namespace.",
+	Short: "update namespaceId",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 2 || len(args) > 3 {
 			return errors.New("namespaceId and namespaceName args is required")
@@ -136,13 +133,13 @@ var updateCmd = &cobra.Command{
 		}
 		_, err := nacosClient.UpdateNamespace(namespaceId, namespaceName, namespaceDesc)
 		internal.CheckErr(err)
-		internal.Info("update namespace %s success", namespaceId)
+		internal.Info("update namespaceId %s success", namespaceId)
 	},
 }
 
 var nsDeleteCmd = &cobra.Command{
 	Use:   "delete <namespaceId>",
-	Short: "delete namespace.",
+	Short: "delete namespaceId",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			return errors.New("namespaceId arg is required")
@@ -153,7 +150,7 @@ var nsDeleteCmd = &cobra.Command{
 		namespaceId := args[0]
 		_, err := nacosClient.DeleteNamespace(namespaceId)
 		internal.CheckErr(err)
-		internal.Info("delete namespace %s success", namespaceId)
+		internal.Info("delete namespaceId %s success", namespaceId)
 	},
 }
 
@@ -162,6 +159,6 @@ func init() {
 	nsCmd.AddCommand(nsListCmd)
 	nsCmd.AddCommand(nsGetCmd)
 	nsCmd.AddCommand(nsCreateCmd)
-	nsCmd.AddCommand(updateCmd)
+	nsCmd.AddCommand(nsUpdateCmd)
 	nsCmd.AddCommand(nsDeleteCmd)
 }

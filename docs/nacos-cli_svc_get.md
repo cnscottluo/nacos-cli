@@ -15,10 +15,10 @@ nacos-cli svc get <serviceName> [flags]
 ### Options inherited from parent commands
 
 ```
-  -g, --group string       group
-  -n, --namespace string   namespace
-      --setting string     setting file (default is $HOME/.nacos.toml)
-      --verbose            verbose output
+  -g, --group string         group
+  -n, --namespaceId string   namespaceId
+      --setting string       setting file (default is $HOME/.nacos.toml)
+      --verbose              verbose output
 ```
 
 ### SEE ALSO

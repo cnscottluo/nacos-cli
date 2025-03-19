@@ -13,48 +13,41 @@ var (
 
 var userCmd = &cobra.Command{
 	Use:   "user",
-	Short: "User management",
-	Long:  `User management`,
+	Short: "user management",
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = cmd.Help()
 	},
 }
 
-var initCmd = &cobra.Command{
+var userInitCmd = &cobra.Command{
 	Use:   "init <password>",
-	Short: "Init admin user password",
-	Long:  `Init admin user password.`,
+	Short: "init admin user password",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			return errors.New("password is required")
+			return errors.New("password arg is required")
 		}
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		r, err := nacosClient.InitAdmin(args[0])
+		password := args[0]
+		r, err := nacosClient.InitAdmin(password)
 		internal.CheckErr(err)
 		internal.Info("Username:%s\nPassword:%s", r.Username, r.Password)
 	},
 }
 
-var passCmd = &cobra.Command{
+var userPassCmd = &cobra.Command{
 	Use:   "pass <password>",
-	Short: "Change user password.",
-	Long:  `Change user password.`,
+	Short: "change user password",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			return errors.New("password is required")
-		}
-		return nil
-	},
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		if username == "" {
-			return errors.New("username is required")
+			return errors.New("password arg is required")
 		}
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		r, err := nacosClient.UpdateUser(username, args[0])
+		password := args[0]
+		r, err := nacosClient.UpdateUser(username, password)
 		internal.CheckErr(err)
 		internal.Info("%s", r)
 	},
@@ -62,7 +55,7 @@ var passCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(userCmd)
-	userCmd.AddCommand(initCmd)
-	userCmd.AddCommand(passCmd)
-	passCmd.Flags().StringVarP(&username, "username", "u", "nacos", "username")
+	userCmd.AddCommand(userInitCmd)
+	userCmd.AddCommand(userPassCmd)
+	userPassCmd.Flags().StringVarP(&username, "username", "u", "nacos", "username")
 }

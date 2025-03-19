@@ -10,8 +10,8 @@ import (
 
 var authCmd = &cobra.Command{
 	Use:   "auth",
-	Short: "Auth user",
-	Long:  `Auth user by username and password`,
+	Short: "auth user",
+	Long:  `auth user by username and password.`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		setting.CreateIfNotExistConfigFile()
 		bindViper(cmd)
@@ -27,10 +27,9 @@ var authCmd = &cobra.Command{
 	},
 }
 
-var clearCmd = &cobra.Command{
+var authClearCmd = &cobra.Command{
 	Use:   "clear",
-	Short: "Clear user auth",
-	Long:  `Clear user auth`,
+	Short: "clear user auth",
 	Run: func(cmd *cobra.Command, args []string) {
 		setting.DeleteConfigFile()
 	},
@@ -40,7 +39,7 @@ func bindViper(cmd *cobra.Command) {
 	_ = viper.BindPFlag(setting.NacosAddrKey, cmd.Flags().Lookup("addr"))
 	_ = viper.BindPFlag(setting.NacosUsernameKey, cmd.Flags().Lookup("username"))
 	_ = viper.BindPFlag(setting.NacosPasswordKey, cmd.Flags().Lookup("password"))
-	_ = viper.BindPFlag(setting.NacosNamespaceKey, cmd.Flags().Lookup("namespace"))
+	_ = viper.BindPFlag(setting.NacosNamespaceKey, cmd.Flags().Lookup("namespaceId"))
 	_ = viper.BindPFlag(setting.NacosGroupKey, cmd.Flags().Lookup("group"))
 }
 
@@ -49,7 +48,7 @@ func init() {
 	authCmd.Flags().StringP("addr", "a", setting.DefaultAddr, "nacos server address")
 	authCmd.Flags().StringP("username", "u", setting.DefaultUsername, "nacos username")
 	authCmd.Flags().StringP("password", "p", setting.DefaultPassword, "nacos password")
-	authCmd.Flags().StringP("namespace", "n", setting.DefaultNamespace, "nacos namespace")
+	authCmd.Flags().StringP("namespaceId", "n", setting.DefaultNamespace, "nacos namespaceId")
 	authCmd.Flags().StringP("group", "g", setting.DefaultGroup, "nacos group")
-	authCmd.AddCommand(clearCmd)
+	authCmd.AddCommand(authClearCmd)
 }

@@ -1,10 +1,6 @@
 ## nacos-cli config get
 
-get setting
-
-### Synopsis
-
-get setting.
+get config
 
 ```
 nacos-cli config get <dataId> [flags]
@@ -13,10 +9,10 @@ nacos-cli config get <dataId> [flags]
 ### Options
 
 ```
-  -g, --group string       group
-  -h, --help               help for get
-  -n, --namespace string   namespace
-  -s, --save               save setting to current directory
+  -g, --group string         group
+  -h, --help                 help for get
+  -n, --namespaceId string   namespaceId
+  -s, --save                 save config to current directory
 ```
 
 ### Options inherited from parent commands

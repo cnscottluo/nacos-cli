@@ -1,10 +1,6 @@
 ## nacos-cli config edit
 
-edit setting
-
-### Synopsis
-
-edit setting.
+edit config
 
 ```
 nacos-cli config edit <dataId> [flags]
@@ -13,10 +9,10 @@ nacos-cli config edit <dataId> [flags]
 ### Options
 
 ```
-  -g, --group string       group
-  -h, --help               help for edit
-  -n, --namespace string   namespace
-  -t, --type string        setting type (text,json,xml,yaml,html,properties)
+  -g, --group string         group
+  -h, --help                 help for edit
+  -n, --namespaceId string   namespaceId
+  -t, --type string          config type (text,json,xml,yaml,html,properties,toml)
 ```
 
 ### Options inherited from parent commands

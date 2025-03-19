@@ -75,7 +75,7 @@ func (client *Client) GetNamespaces() (*[]NamespaceResp, error) {
 
 // GetNamespace get namespace
 func (client *Client) GetNamespace(namespaceId string) (*NamespaceResp, error) {
-	if len(namespaceId) == 0 {
+	if namespaceId == "" {
 		namespaceId = client.config.Nacos.Namespace
 	}
 	r, err := Get[R[NamespaceResp]](
@@ -134,7 +134,7 @@ func (client *Client) DeleteNamespace(namespaceId string) (bool, error) {
 
 // GetConfigs get configs
 func (client *Client) GetConfigs(namespaceId string) (*[]ConfigResp, error) {
-	if len(namespaceId) == 0 {
+	if namespaceId == "" {
 		namespaceId = client.config.Nacos.Namespace
 	}
 	r, err := Get[R[[]ConfigResp]](
@@ -148,12 +148,30 @@ func (client *Client) GetConfigs(namespaceId string) (*[]ConfigResp, error) {
 	return r.Data, nil
 }
 
+// GetNamespaceId get namespace id
+func (client *Client) GetNamespaceId(namespaceId string) string {
+	if namespaceId == "" {
+		return client.config.Nacos.Namespace
+	} else {
+		return namespaceId
+	}
+}
+
+// GetGroup get group
+func (client *Client) GetGroup(group string) string {
+	if group == "" {
+		return client.config.Nacos.Group
+	} else {
+		return group
+	}
+}
+
 // GetConfig get setting
 func (client *Client) GetConfig(namespaceId string, group string, dataId string) (string, error) {
-	if len(namespaceId) == 0 {
+	if namespaceId == "" {
 		namespaceId = client.config.Nacos.Namespace
 	}
-	if len(group) == 0 {
+	if group == "" {
 		group = client.config.Nacos.Group
 	}
 	r, err := Get[R[string]](
@@ -171,10 +189,10 @@ func (client *Client) GetConfig(namespaceId string, group string, dataId string)
 
 // DeleteConfig delete setting
 func (client *Client) DeleteConfig(namespaceId string, group string, dataId string) (bool, error) {
-	if len(namespaceId) == 0 {
+	if namespaceId == "" {
 		namespaceId = client.config.Nacos.Namespace
 	}
-	if len(group) == 0 {
+	if group == "" {
 		group = client.config.Nacos.Group
 	}
 	r, err := DeleteByQuery[R[bool]](
@@ -194,10 +212,10 @@ func (client *Client) DeleteConfig(namespaceId string, group string, dataId stri
 func (client *Client) ApplyConfig(
 	namespaceId string, group string, dataId string, content string, configType string,
 ) (bool, error) {
-	if len(namespaceId) == 0 {
+	if namespaceId == "" {
 		namespaceId = client.config.Nacos.Namespace
 	}
-	if len(group) == 0 {
+	if group == "" {
 		group = client.config.Nacos.Group
 	}
 	r, err := Post[R[bool]](
@@ -215,19 +233,19 @@ func (client *Client) ApplyConfig(
 	return *r.Data, nil
 }
 
-func (client *Client) GetServices(namespaceId, groupName string) (*ServiceResp, error) {
-	if len(namespaceId) == 0 {
+func (client *Client) GetServices(namespaceId, group string) (*ServiceResp, error) {
+	if namespaceId == "" {
 		namespaceId = client.config.Nacos.Namespace
 	}
-	if len(groupName) == 0 {
-		groupName = client.config.Nacos.Group
+	if group == "" {
+		group = client.config.Nacos.Group
 	}
 	r, err := Get[R[ServiceResp]](
 		client.httpClient, client.config.Nacos.Addr+GetServiceListUrl, map[string]string{
 			"namespaceId": processNamespace(namespaceId),
-			"groupName":   groupName,
+			"groupName":   group,
 			"pageNo":      "1",
-			"pageSize":    "20",
+			"pageSize":    "100",
 		},
 	)
 	if err != nil {
@@ -236,18 +254,18 @@ func (client *Client) GetServices(namespaceId, groupName string) (*ServiceResp, 
 	return r.Data, nil
 }
 
-func (client *Client) GetService(namespaceId string, groupName string, serviceName string) (*ServiceDetailResp, error) {
-	if len(namespaceId) == 0 {
+func (client *Client) GetService(namespaceId string, group string, serviceName string) (*ServiceDetailResp, error) {
+	if namespaceId == "" {
 		namespaceId = client.config.Nacos.Namespace
 	}
-	if len(groupName) == 0 {
-		groupName = client.config.Nacos.Group
+	if group == "" {
+		group = client.config.Nacos.Group
 	}
 	r, err := Get[R[ServiceDetailResp]](
 		client.httpClient, client.config.Nacos.Addr+GetServiceUrl, map[string]string{
-			"serviceName": serviceName,
 			"namespaceId": processNamespace(namespaceId),
-			"groupName":   groupName,
+			"serviceName": serviceName,
+			"groupName":   group,
 		},
 	)
 	if err != nil {
@@ -256,20 +274,20 @@ func (client *Client) GetService(namespaceId string, groupName string, serviceNa
 	return r.Data, nil
 }
 
-func (client *Client) GetServiceInstances(namespaceId string, groupName string, serviceName string) (
+func (client *Client) GetServiceInstances(namespaceId string, group string, serviceName string) (
 	*InstanceResp, error,
 ) {
-	if len(namespaceId) == 0 {
+	if namespaceId == "" {
 		namespaceId = client.config.Nacos.Namespace
 	}
-	if len(groupName) == 0 {
-		groupName = client.config.Nacos.Group
+	if group == "" {
+		group = client.config.Nacos.Group
 	}
 	r, err := Get[R[InstanceResp]](
 		client.httpClient, client.config.Nacos.Addr+GetInstanceListUrl, map[string]string{
-			"serviceName": serviceName,
 			"namespaceId": processNamespace(namespaceId),
-			"groupName":   groupName,
+			"serviceName": serviceName,
+			"groupName":   group,
 		},
 	)
 	if err != nil {

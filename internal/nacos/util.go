@@ -8,7 +8,12 @@ import (
 // DetermineConfigType determines the type of the configuration file based on the file extension.
 func DetermineConfigType(filePath string) string {
 	ext := strings.TrimPrefix(strings.ToLower(filepath.Ext(filePath)), ".")
-	switch ext {
+	return StandardizeConfigType(ext, "text")
+}
+
+// StandardizeConfigType standardizes the configType to a known type.
+func StandardizeConfigType(configType string, defaultType string) string {
+	switch strings.ToLower(configType) {
 	case "properties":
 		return "properties"
 	case "xml":
@@ -19,8 +24,12 @@ func DetermineConfigType(filePath string) string {
 		return "html"
 	case "yaml", "yml":
 		return "yaml"
-	default:
+	case "text":
 		return "text"
+	case "toml":
+		return "toml"
+	default:
+		return defaultType
 	}
 }
 
@@ -31,11 +40,11 @@ func DetermineDataId(file string) string {
 
 // IsValidConfigType checks if the configType is valid.
 func IsValidConfigType(configType string) bool {
-	switch strings.ToLower(configType) {
-	case "properties", "xml", "json", "html", "yaml", "text":
-		return true
-	default:
+	standardizeConfigType := StandardizeConfigType(configType, "")
+	if standardizeConfigType == "" {
 		return false
+	} else {
+		return true
 	}
 }
 

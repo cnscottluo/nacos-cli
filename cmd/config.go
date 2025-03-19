@@ -17,36 +17,32 @@ import (
 var save bool
 
 var (
-	dataId     string
-	configType string
+	namespaceId string
+	group       string
+	dataId      string
+	configType  string
 )
 
 // config command
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "config management",
-	Long:  `config management.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = cmd.Help()
 	},
 }
 
-// list config in namespace
+// list config in namespaceId
 var configListCmd = &cobra.Command{
-	Use:   "list [namespace]",
-	Short: "list setting in namespace",
-	Long:  `list setting in namespace.`,
+	Use:   "list [namespaceId]",
+	Short: "list config in namespaceId",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 1 {
 			return errors.New("too many arguments")
 		}
 		return nil
 	},
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		return checkAddr()
-	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var namespaceId string
 		if len(args) == 1 {
 			namespaceId = args[0]
 		}
@@ -69,8 +65,7 @@ var configListCmd = &cobra.Command{
 // get config
 var configGetCmd = &cobra.Command{
 	Use:   "get <dataId>",
-	Short: "get setting",
-	Long:  `get setting.`,
+	Short: "get config",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 1 {
 			return errors.New("too many arguments")
@@ -80,16 +75,16 @@ var configGetCmd = &cobra.Command{
 		}
 		return nil
 	},
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		return checkAddr()
-	},
 	Run: func(cmd *cobra.Command, args []string) {
 		dataId := args[0]
-		content, err := nacosClient.GetConfig(namespace, group, dataId)
+		content, err := nacosClient.GetConfig(namespaceId, group, dataId)
 		internal.CheckErr(err)
 		internal.ShowConfig(dataId, content)
 		if save {
-			internal.SaveConfig(dataId, content)
+			err := internal.SaveConfig(
+				nacosClient.GetNamespaceId(namespaceId), nacosClient.GetGroup(group), dataId, content,
+			)
+			internal.CheckErr(err)
 		}
 	},
 }
@@ -97,8 +92,7 @@ var configGetCmd = &cobra.Command{
 // delete config
 var configDeleteCmd = &cobra.Command{
 	Use:   "delete <dataId>",
-	Short: "delete setting",
-	Long:  `delete setting.`,
+	Short: "delete config",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 1 {
 			return errors.New("too many arguments")
@@ -108,22 +102,18 @@ var configDeleteCmd = &cobra.Command{
 		}
 		return nil
 	},
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		return checkAddr()
-	},
 	Run: func(cmd *cobra.Command, args []string) {
 		dataId := args[0]
-		_, err := nacosClient.DeleteConfig(namespace, group, dataId)
+		_, err := nacosClient.DeleteConfig(namespaceId, group, dataId)
 		internal.CheckErr(err)
-		internal.Info("delete setting %s success(maybe error result)", dataId)
+		internal.Info("delete config %s success(maybe error result)", dataId)
 	},
 }
 
 // apply config
 var configApplyCmd = &cobra.Command{
 	Use:   "apply <file>",
-	Short: "apply setting",
-	Long:  `apply setting.`,
+	Short: "apply config",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 1 {
 			return errors.New("too many arguments")
@@ -134,18 +124,15 @@ var configApplyCmd = &cobra.Command{
 		return nil
 	},
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		if err := checkAddr(); err != nil {
-			return err
-		}
 		file := args[0]
-		if len(dataId) == 0 {
+		if dataId == "" {
 			dataId = nacos.DetermineDataId(file)
 		}
-		if len(configType) == 0 {
+		if configType == "" {
 			configType = nacos.DetermineConfigType(file)
 		} else {
 			if !nacos.IsValidConfigType(configType) {
-				return errors.New("invalid setting type")
+				return errors.New("invalid config type")
 			}
 			configType = strings.ToLower(configType)
 		}
@@ -155,17 +142,16 @@ var configApplyCmd = &cobra.Command{
 		file := args[0]
 		content, err := internal.ReadFile(file)
 		internal.CheckErr(err)
-		_, err = nacosClient.ApplyConfig(namespace, group, dataId, content, configType)
+		_, err = nacosClient.ApplyConfig(namespaceId, group, dataId, content, configType)
 		internal.CheckErr(err)
-		internal.Info("apply setting %s success", dataId)
+		internal.Info("apply config %s success", dataId)
 	},
 }
 
 // edit config
 var configEditCmd = &cobra.Command{
 	Use:   "edit <dataId>",
-	Short: "edit setting",
-	Long:  `edit setting.`,
+	Short: "edit config",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 1 {
 			return errors.New("too many arguments")
@@ -176,15 +162,12 @@ var configEditCmd = &cobra.Command{
 		return nil
 	},
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		if err := checkAddr(); err != nil {
-			return err
-		}
 		dataId := args[0]
-		if len(configType) == 0 {
+		if configType == "" {
 			configType = nacos.DetermineConfigType(dataId)
 		} else {
 			if !nacos.IsValidConfigType(configType) {
-				return errors.New("invalid setting type")
+				return errors.New("invalid config type")
 			}
 			configType = strings.ToLower(configType)
 		}
@@ -192,10 +175,10 @@ var configEditCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		dataId := args[0]
-		content, err := nacosClient.GetConfig(namespace, group, dataId)
+		content, err := nacosClient.GetConfig(namespaceId, group, dataId)
 		internal.CheckErr(err)
 		originMD5 := internal.GenStringMD5(content)
-		internal.VerboseLog("origin setting md5: %s", originMD5)
+		internal.VerboseLog("origin config md5: %s", originMD5)
 
 		// use default editor
 		editor := editor.NewDefaultEditor([]string{})
@@ -217,9 +200,9 @@ var configEditCmd = &cobra.Command{
 		if originMD5 == editedMD5 {
 			internal.VerboseLog("no change")
 		} else {
-			_, err = nacosClient.ApplyConfig(namespace, group, dataId, string(editedContent), configType)
+			_, err = nacosClient.ApplyConfig(namespaceId, group, dataId, string(editedContent), configType)
 			internal.CheckErr(err)
-			internal.Info("edit setting %s success", dataId)
+			internal.Info("edit config %s success", dataId)
 		}
 	},
 }
@@ -232,23 +215,23 @@ func init() {
 	configCmd.AddCommand(configApplyCmd)
 	configCmd.AddCommand(configEditCmd)
 
-	configGetCmd.Flags().BoolVarP(&save, "save", "s", false, "save setting to current directory")
-	configGetCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "namespace")
+	configGetCmd.Flags().BoolVarP(&save, "save", "s", false, "save config to current directory")
+	configGetCmd.Flags().StringVarP(&namespaceId, "namespaceId", "n", "", "namespaceId")
 	configGetCmd.Flags().StringVarP(&group, "group", "g", "", "group")
 
-	configDeleteCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "namespace")
+	configDeleteCmd.Flags().StringVarP(&namespaceId, "namespaceId", "n", "", "namespaceId")
 	configDeleteCmd.Flags().StringVarP(&group, "group", "g", "", "group")
 
-	configApplyCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "namespace")
+	configApplyCmd.Flags().StringVarP(&namespaceId, "namespaceId", "n", "", "namespaceId")
 	configApplyCmd.Flags().StringVarP(&group, "group", "g", "", "group")
-	configApplyCmd.Flags().StringVarP(&dataId, "data-id", "d", "", "setting data id")
+	configApplyCmd.Flags().StringVarP(&dataId, "data-id", "d", "", "config data id")
 	configApplyCmd.Flags().StringVarP(
-		&configType, "type", "t", "", "setting type (text,json,xml,yaml,html,properties)",
+		&configType, "type", "t", "", "config type (text,json,xml,yaml,html,properties,toml)",
 	)
 
-	configEditCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "namespace")
+	configEditCmd.Flags().StringVarP(&namespaceId, "namespaceId", "n", "", "namespaceId")
 	configEditCmd.Flags().StringVarP(&group, "group", "g", "", "group")
 	configEditCmd.Flags().StringVarP(
-		&configType, "type", "t", "", "setting type (text,json,xml,yaml,html,properties)",
+		&configType, "type", "t", "", "config type (text,json,xml,yaml,html,properties,toml)",
 	)
 }

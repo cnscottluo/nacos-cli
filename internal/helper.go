@@ -11,6 +11,8 @@ import (
 	"math/big"
 	mrand "math/rand"
 	"os"
+	"path"
+	"path/filepath"
 	"reflect"
 	"strings"
 
@@ -109,8 +111,13 @@ func GenData[T any](data *[]T, trans func(T) []string) [][]string {
 }
 
 // SaveConfig save setting
-func SaveConfig(dataId string, result string) {
-	_ = os.WriteFile(dataId, []byte(result), 0644)
+func SaveConfig(namespaceId string, group string, dataId string, result string) error {
+	filePath := path.Join(namespaceId, group, dataId)
+	err := os.MkdirAll(filepath.Dir(filePath), 0755)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filePath, []byte(result), 0644)
 }
 
 // Bool2String bool to string

@@ -1,13 +1,9 @@
 ## nacos-cli config list
 
-list setting in namespace
-
-### Synopsis
-
-list setting in namespace.
+list config in namespaceId
 
 ```
-nacos-cli config list [namespace] [flags]
+nacos-cli config list [namespaceId] [flags]
 ```
 
 ### Options

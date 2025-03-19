@@ -11,7 +11,6 @@ import (
 var svcCmd = &cobra.Command{
 	Use:   "svc",
 	Short: "service management",
-	Long:  `service management.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = cmd.Help()
 	},
@@ -20,12 +19,8 @@ var svcCmd = &cobra.Command{
 var svcListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list services",
-	Long:  `list services.`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		return checkAddr()
-	},
 	Run: func(cmd *cobra.Command, args []string) {
-		services, err := nacosClient.GetServices(namespace, group)
+		services, err := nacosClient.GetServices(namespaceId, group)
 		internal.CheckErr(err)
 		internal.ShowTable(
 			[]string{"Service"}, internal.GenData(
@@ -49,22 +44,19 @@ var svcGetCmd = &cobra.Command{
 		}
 		return nil
 	},
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		return checkAddr()
-	},
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceName := args[0]
-		service, err := nacosClient.GetService(namespace, group, serviceName)
+		service, err := nacosClient.GetService(namespaceId, group, serviceName)
 		internal.CheckErr(err)
 		internal.ShowTable(
 			[]string{
-				"Namespace", "GroupName", "ServiceName", "Metadata", "ProtectThreshold", "Ephemeral",
+				"Namespace Id", "ServiceName", "GroupName", "Metadata", "ProtectThreshold", "Ephemeral",
 			}, internal.GenData(
 				&[]nacos.ServiceDetailResp{*service}, func(resp nacos.ServiceDetailResp) []string {
 					return []string{
 						resp.Namespace,
-						resp.GroupName,
 						resp.ServiceName,
+						resp.GroupName,
 						internal.ToString(resp.Metadata),
 						internal.ToString(resp.ProtectThreshold),
 						internal.ToString(resp.Ephemeral),
@@ -77,8 +69,7 @@ var svcGetCmd = &cobra.Command{
 
 var svcInsCmd = &cobra.Command{
 	Use:   "ins <serviceName>",
-	Short: "instance management",
-	Long:  `instance management.`,
+	Short: "instance details",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 1 {
 			return errors.New("too many arguments")
@@ -88,12 +79,9 @@ var svcInsCmd = &cobra.Command{
 		}
 		return nil
 	},
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		return checkAddr()
-	},
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceName := args[0]
-		instances, err := nacosClient.GetServiceInstances(namespace, group, serviceName)
+		instances, err := nacosClient.GetServiceInstances(namespaceId, group, serviceName)
 		internal.CheckErr(err)
 		internal.ShowTable(
 			[]string{
@@ -122,7 +110,6 @@ func init() {
 	svcCmd.AddCommand(svcListCmd)
 	svcCmd.AddCommand(svcGetCmd)
 	svcCmd.AddCommand(svcInsCmd)
-
-	svcCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "namespace")
+	svcCmd.PersistentFlags().StringVarP(&namespaceId, "namespaceId", "n", "", "namespaceId")
 	svcCmd.PersistentFlags().StringVarP(&group, "group", "g", "", "group")
 }
