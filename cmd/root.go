@@ -7,7 +7,7 @@ import (
 	"github.com/cnscottluo/nacos-cli/internal/nacos"
 	"github.com/cnscottluo/nacos-cli/internal/types"
 	"github.com/spf13/cobra"
-	"github.com/spf13/cobra/doc"
+	// "github.com/spf13/cobra/doc"
 	"github.com/spf13/viper"
 )
 
@@ -25,8 +25,8 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
-	e := doc.GenMarkdownTree(rootCmd, "./docs")
-	internal.CheckErr(e)
+	// e := doc.GenMarkdownTree(rootCmd, "./docs")
+	// internal.CheckErr(e)
 	err := rootCmd.Execute()
 	internal.CheckErr(err)
 }
